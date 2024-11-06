@@ -1,5 +1,5 @@
 import React from "react";
-import { useFonts, ArchivoBlack_400Regular, RubikBubbles_400Regular } from "@expo-google-fonts/archivo-black"; 
+// import { useFonts, ArchivoBlack_400Regular, RubikBubbles_400Regular } from "@expo-google-fonts/archivo-black"; 
 import { View, Text, ImageBackground, FlatList, Image, Dimensions, StyleSheet, ActivityIndicator, ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import HomeCard from "../componentes/HomeCard";
@@ -9,14 +9,14 @@ export default function homeScreen() {
     const { height, width } = Dimensions.get("window");
 
    
-    const [fontsLoaded] = useFonts({
-        ArchivoBlack_400Regular,
-        RubikBubbles_400Regular,
-    });
+    // const [fontsLoaded] = useFonts({
+    //     ArchivoBlack_400Regular,
+    //     RubikBubbles_400Regular,
+    // });
 
-    if (!fontsLoaded) {
-        return <ActivityIndicator size="large" color="#0000ff" />;
-    }
+    // if (!fontsLoaded) {
+    //     return <ActivityIndicator size="large" color="#0000ff" />;
+    // }
 
     const images = [
         require("../../assets/poke_1_1.webp"),
@@ -89,9 +89,9 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     text: {
-        marginTop: 5,
+        marginTop: 100,
         fontSize: 30,
-        fontFamily: 'RubikBubbles',
+        // fontFamily: 'RubikBubbles',
         paddingTop: 5,
         color: "#fff",
         textAlign: "center",
@@ -112,14 +112,15 @@ const styles = StyleSheet.create({
     },
     highlightTitle: {
         fontSize: 24,
-        fontFamily: "ArchivoBlack_400Regular",
+        // fontFamily: "ArchivoBlack_400Regular",
         marginBottom: 20,
         color: "#333",
     },
     cardContainer: {
-        flexDirection: "row",
+        flexDirection: "column",
         justifyContent: "space-around",
         width: "100%",
+        alignItems:"center",
         marginBottom: 20, 
     },
 
