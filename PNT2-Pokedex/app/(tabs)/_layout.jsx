@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { useColorScheme } from "react-native";
-import { Colors } from "react-native/Libraries/NewAppScreen";
+import { Colors } from "../../constants/Colors";
 
 export default function TabsLayout() {
     const colorScheme = useColorScheme();
@@ -13,7 +13,6 @@ export default function TabsLayout() {
                 tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
             }}
         >
-         
             <Tabs.Screen
                 name="homeScreen"
                 options={{
@@ -28,7 +27,7 @@ export default function TabsLayout() {
                 }}
             />
 
-           
+            {/* Mantén ambas pestañas, Pokedex y Profile */}
             <Tabs.Screen
                 name="pokedexScreen"
                 options={{
@@ -37,6 +36,20 @@ export default function TabsLayout() {
                         <Ionicons
                             size={28}
                             name={focused ? "list" : "list-outline"}
+                            color={color}
+                        />
+                    ),
+                }}
+            />
+
+            <Tabs.Screen
+                name="profile"
+                options={{
+                    title: "Profile",
+                    tabBarIcon: ({ color, focused }) => (
+                        <Ionicons
+                            size={28}
+                            name={focused ? "person-circle" : "person-circle-outline"}
                             color={color}
                         />
                     ),

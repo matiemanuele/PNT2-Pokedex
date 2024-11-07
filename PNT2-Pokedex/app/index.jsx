@@ -1,74 +1,72 @@
-import { StyleSheet, Text, View, TextInput } from "react-native";
+import { StyleSheet, Text, View, TextInput, Switch, Button } from "react-native";
 import { useState } from "react";
-import { Switch } from "react-native";
-import { Button } from "react-native";
-import { Pressable, onPress } from "react-native";
-import { router } from "expo-router";
 import { useRouter } from "expo-router";
+import { useUser } from "./context/UserContext";
 
 export default function Page() {
 
-    const [esLogin, setLogin] = useState(true);
-    const [email, setEmail] = useState("");
-    const [usuario, setUsuario] = useState("");
-    const [password, setPassword] = useState("");
-    const [nombre, setNombre] = useState("");
+  const [esLogin, setLogin] = useState(true);
+  const [email, setEmail] = useState("");
+  const [usuario, setUsuario] = useState("");
+  const [password, setPassword] = useState("");
+  const [nombre, setNombre] = useState("");
 
-    const router = useRouter();
+  const router = useRouter();
 
-
+  const { setUserNameContext } = useUser()
 
   const handleLogin = async () => {
 
-      try {
-        const response = await fetch("https://67183558b910c6a6e02b585f.mockapi.io/api/v1/users");
-        const data = await response.json();
-        const user = data.find(u => u.username === usuario && u.password === password)
+    try {
+      const response = await fetch("https://6711a7964eca2acdb5f554b7.mockapi.io/api/v1/users");
+      const data = await response.json();
+      const user = data.find(u => u.user === usuario && u.password === password)
 
-        if(user){
-          alert("Login conseguido")
-          router.push("/homeScreen");
-        }else{
-          alert("Login fallido")
-        }
-
-      } catch (error) {
-        console.error(error)
-        alert("Error en la autenticación")
+      if (user) {
+        alert("Login conseguido")
+        setUserNameContext(user.name)
+        // localStorage.setItem("userName", user.name);
+        router.push("/homeScreen")
+      } else {
+        alert("Login fallido")
       }
+
+    } catch (error) {
+      console.error(error)
+      alert("Error en la autenticación")
+    }
   }
 
   const handleRegister = async () => {
     try {
-      const response = await fetch("https://67183558b910c6a6e02b585f.mockapi.io/api/v1/users");
+      const response = await fetch("https://6711a7964eca2acdb5f554b7.mockapi.io/api/v1/users");
       const data = await response.json();
-      const userExiste = data.some(u => u.username === usuario)
+      const userExiste = data.some(u => u.user === usuario)
       const mailExiste = data.some(u => u.mail === email)
 
-      if(userExiste){
+      if (userExiste) {
         alert("Este usuario ya está registrado")
-      }else if(mailExiste){
+      } else if (mailExiste) {
         alert("Ya existe una cuenta con este email")
-      }else{
-        const response = await fetch("https://67183558b910c6a6e02b585f.mockapi.io/api/v1/users", {
-            method: "POST",
-            headers:{
-              "Content-type":"application/json"
-            },
-            body: JSON.stringify({
-              name: nombre,
-              avatar: 'https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg',
-              password: password,
-              mail: email,
-              username: usuario
-            })
+      } else {
+        const response = await fetch("https://6711a7964eca2acdb5f554b7.mockapi.io/api/v1/users", {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json"
+          },
+          body: JSON.stringify({
+            user: usuario,
+            email: email,
+            name: nombre,
+            password: password,
+          })
         });
 
-        if(response.ok){
+        if (response.ok) {
           alert("Registro exitoso")
-          const nuevoUsuario = response.json();
-          router.push("/homeScreen");
-        }else{
+          const nuevoUsuario = await response.json();
+          // localStorage.setItem("userName", nuevoUsuario.name);
+        } else {
           alert("Error al registrar el usuario")
         }
 
@@ -85,51 +83,60 @@ export default function Page() {
     <View style={styles.container}>
       <View style={styles.main}>
         <Text style={styles.title}>Bienvenido</Text>
-        <Text style={styles.subtitle}>{esLogin?"Inicia sesión con tu cuenta":"Crea una cuenta"}</Text>
-        <Text>Usuario: </Text> 
-        <TextInput style={styles.input}
-        placeholder = "nombre usuario"
-        /> 
+        <Text style={styles.subtitle}>{esLogin ? "Inicia sesión con tu cuenta" : "Crea una cuenta"}</Text>
+        <Text>Usuario: </Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Nombre usuario"
+          value={usuario}
+          onChangeText={setUsuario}
+        />
         {
-          !esLogin &&(
+          !esLogin && (
             <>
-        <Text>Email: </Text> 
-        <TextInput style={styles.input}
-        placeholder = "email@gmail.com"
-        /> 
+              <Text>Email: </Text>
+              <TextInput style={styles.input}
+                placeholder="email@gmail.com"
+                value={email}
+                onChangeText={setEmail}
+              />
 
-        <Text>Nombre: </Text>
-        <TextInput style={styles.input}
-        placeholder = "nombre"
-        /> 
+              <Text>Nombre: </Text>
+              <TextInput style={styles.input}
+                placeholder="nombre"
+                value={nombre}
+                onChangeText={setNombre}
+              />
             </>
           )
         }
-        <Text>Contraseña: </Text> 
-       <TextInput style={styles.input}
-        secureTextEntry = {true} 
-        placeholder = "contraseña"
-        /> 
+        <Text>Contraseña: </Text>
+        <TextInput style={styles.input}
+          secureTextEntry={true}
+          placeholder="contraseña"
+          value={password}
+          onChangeText={setPassword}
+        />
       </View>
       <View style={styles.boton}>
-       
+
         {esLogin ?
-            (<Button title={"Iniciar sesión"} onPress={handleLogin}/>
-    
-            )
-            //<Pressable style={styles.button} onPress={onPress}>
-            //  <Text style={styles.text}>Iniciar sesión:</Text>
-            //</Pressable>
-            
+          (<Button title={"Iniciar sesión"} onPress={handleLogin} />
+
+          )
+          //<Pressable style={styles.button} onPress={onPress}>
+          //  <Text style={styles.text}>Iniciar sesión:</Text>
+          //</Pressable>
+
           :
-          (<Button title={"Registrarse"} onPress={handleRegister}/>)}
-          
-        
+          (<Button title={"Registrarse"} onPress={handleRegister} />)}
+
+
       </View>
-      
+
       <View>
-          <Text>{esLogin ? "Cambia a registrarse" : "Cambia a login"} </Text>
-          <Switch value={esLogin} onValueChange={()=> setLogin(!esLogin)}/>
+        <Text>{esLogin ? "Cambia a registrarse" : "Cambia a login"} </Text>
+        <Switch value={esLogin} onValueChange={() => setLogin(!esLogin)} />
       </View>
     </View>
   );
@@ -164,9 +171,9 @@ const styles = StyleSheet.create({
     width: "80%",
     height: 50,
     marginTop: 20,
-    borderRadius: 30, 
+    borderRadius: 30,
     backgroundColor: "#fff",
-    
+
   },
   button: {
     alignItems: 'center',
