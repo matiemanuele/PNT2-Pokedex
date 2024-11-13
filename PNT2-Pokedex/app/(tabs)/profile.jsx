@@ -1,40 +1,28 @@
-import React, { useState, useEffect } from 'react'
-import { View, Text, FlatList, StyleSheet, Image } from 'react-native'
-import { useUser } from '../context/UserContext'
+
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, StyleSheet, Image } from 'react-native';
+import { useUser } from '../context/UserContext';
+import { useFavoritePokemons } from '../context/FavoritePokemonContext'; // Importamos el contexto
 
 const ProfileTab = ({ route }) => {
-  const [userName, setUserName] = useState('')
-  const [favoritePokemons, setFavoritePokemons] = useState([])
+  const [userName, setUserName] = useState('');
+  const { userNameContext } = useUser();
+  const { favoritePokemons } = useFavoritePokemons(); // Obtenemos los Pokémon favoritos desde el contexto
   const [pokemonImage, setPokemonImage] = useState('');
 
-  const { userNameContext } = useUser()
-
   useEffect(() => {
-    setUserName(userNameContext)
-  }, []);
-
-  // useEffect(() => {
-  //   const storedUserName = localStorage.getItem("userName")
-  //   setUserName(storedUserName || 'Invitado')
-  // }, []);
-
-  useEffect(() => {
-    setFavoritePokemons([
-      { id: '001', name: 'Bulbasaur' },
-      { id: '004', name: 'Charmander' },
-      { id: '007', name: 'Squirtle' },
-    ]);
-  }, []);
+    setUserName(userNameContext);
+  }, [userNameContext]);
 
   useEffect(() => {
     const fetchPokemonImage = async () => {
       try {
-        const randomId = Math.floor(Math.random() * 898) + 1
-        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${randomId}`)
+        const randomId = Math.floor(Math.random() * 898) + 1;
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${randomId}`);
         const data = await response.json();
-        setPokemonImage(data.sprites.front_default)
+        setPokemonImage(data.sprites.front_default);
       } catch (error) {
-        console.error('Error fetching Pokémon image:', error)
+        console.error('Error fetching Pokémon image:', error);
       }
     };
 
@@ -50,16 +38,21 @@ const ProfileTab = ({ route }) => {
         <Text>Cargando imagen de Pokémon...</Text>
       )}
       <Text style={styles.title}>Tus Pokémones Favoritos</Text>
-      <FlatList
-        data={favoritePokemons}
-        keyExtractor={(item) => item.id}
-        numColumns={3}
-        renderItem={({ item }) => (
-          <View style={styles.pokemonCard}>
-            <Text style={styles.pokemonName}>{item.name}</Text>
-          </View>
-        )}
-      />
+      {favoritePokemons.length === 0 ? (
+        <Text>No tienes Pokémon favoritos aún</Text>
+      ) : (
+        <FlatList
+          data={favoritePokemons}
+          keyExtractor={(item) => item.id.toString()}
+          numColumns={3}
+          renderItem={({ item }) => (
+            <View style={styles.pokemonCard}>
+              <Text style={styles.pokemonName}>{item.name}</Text>
+              <Image source={{ uri: item.image }} style={styles.pokemonImage} />
+            </View>
+          )}
+        />
+      )}
     </View>
   );
 };
@@ -101,4 +94,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProfileTab
+export default ProfileTab;

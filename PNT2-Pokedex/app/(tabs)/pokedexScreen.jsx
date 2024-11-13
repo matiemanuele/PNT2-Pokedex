@@ -1,23 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, Image } from "react-native";
+import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { useFavoritePokemons } from "../context/FavoritePokemonContext"; 
 
 export default function PokedexScreen() {
     const [pokemons, setPokemons] = useState([]);
     const [loading, setLoading] = useState(true);
+    const { addFavoritePokemon, removeFavoritePokemon, favoritePokemons } = useFavoritePokemons();
 
     useEffect(() => {
         const fetchPokemons = async () => {
             try {
                 const response = await fetch("https://pokeapi.co/api/v2/pokemon?limit=151");
                 const data = await response.json();
-                
+
                 const pokemonDetails = await Promise.all(
                     data.results.map(async (pokemon) => {
                         const pokemonResponse = await fetch(pokemon.url);
                         const pokemonData = await pokemonResponse.json();
                         return {
+                            id: pokemonData.id,
                             name: pokemon.name,
-                            image: pokemonData.sprites.front_default, 
+                            image: pokemonData.sprites.front_default,
                         };
                     })
                 );
@@ -37,6 +40,22 @@ export default function PokedexScreen() {
         <View style={styles.item}>
             <Image source={{ uri: item.image }} style={styles.image} />
             <Text style={styles.pokemonName}>{item.name}</Text>
+            <TouchableOpacity
+                style={styles.button}
+                onPress={() => {
+                    if (favoritePokemons.find((pokemon) => pokemon.id === item.id)) {
+                        removeFavoritePokemon(item.id); 
+                    } else {
+                        addFavoritePokemon(item); 
+                    }
+                }}
+            >
+                <Text style={styles.buttonText}>
+                    {favoritePokemons.find((pokemon) => pokemon.id === item.id)
+                        ? "Quitar de Favoritos"
+                        : "Agregar a Favoritos"}
+                </Text>
+            </TouchableOpacity>
         </View>
     );
 
@@ -49,9 +68,9 @@ export default function PokedexScreen() {
             <Text style={styles.title}>Pokedex - Primera Generación</Text>
             <FlatList
                 data={pokemons}
-                keyExtractor={(item) => item.name}
+                keyExtractor={(item) => item.id.toString()}
                 renderItem={renderItem}
-                numColumns={3} 
+                numColumns={3}
                 contentContainerStyle={styles.list}
             />
         </View>
@@ -94,5 +113,15 @@ const styles = StyleSheet.create({
         fontSize: 20,
         textAlign: "center",
         marginTop: 20,
+    },
+    button: {
+        backgroundColor: "#007bff",
+        padding: 10,
+        borderRadius: 5,
+        marginTop: 10,
+    },
+    buttonText: {
+        color: "#fff",
+        fontWeight: "bold",
     },
 });
