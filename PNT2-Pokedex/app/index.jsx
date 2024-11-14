@@ -13,68 +13,29 @@ export default function Page() {
 
   const router = useRouter();
 
-  const { setUserName } = useUser()
+  const { login, register } = useUser()
 
   const handleLogin = async () => {
-
-    try {
-      const response = await fetch("https://6711a7964eca2acdb5f554b7.mockapi.io/api/v1/users");
-      const data = await response.json();
-      const user = data.find(u => u.user === usuario && u.password === password)
-
-      if (user) {
-        alert("Login conseguido")
-        setUserName(user.name)
-        router.push("/homeScreen")
-      } else {
-        alert("Login fallido")
-      }
-
-    } catch (error) {
-      console.error(error)
+    const result = await login(usuario, password)
+    if (result === true) {
+      alert("Login conseguido")
+      router.push("/homeScreen")
+    } else if (result === false) {
+      alert("Login fallido")
+    } else {
       alert("Error en la autenticación")
     }
   }
 
   const handleRegister = async () => {
-    try {
-      const response = await fetch("https://6711a7964eca2acdb5f554b7.mockapi.io/api/v1/users");
-      const data = await response.json();
-      const userExiste = data.some(u => u.user === usuario)
-      const mailExiste = data.some(u => u.mail === email)
-
-      if (userExiste) {
-        alert("Este usuario ya está registrado")
-      } else if (mailExiste) {
-        alert("Ya existe una cuenta con este email")
+    const result = await register(usuario, email, password, nombre)
+      if (result === true) {
+        alert("Registro exitoso")
+      } else if (result === false) {
+        alert("Usuario o email ya registrado")
       } else {
-        const response = await fetch("https://6711a7964eca2acdb5f554b7.mockapi.io/api/v1/users", {
-          method: "POST",
-          headers: {
-            "Content-type": "application/json"
-          },
-          body: JSON.stringify({
-            user: usuario,
-            email: email,
-            name: nombre,
-            password: password,
-          })
-        });
-
-        if (response.ok) {
-          alert("Registro exitoso")
-          const nuevoUsuario = await response.json();
-          setUserName(user.name)
-        } else {
-          alert("Error al registrar el usuario")
-        }
-
+        alert("Error en la autenticación")
       }
-
-    } catch (error) {
-      console.error(error)
-      alert("Error en la autenticación")
-    }
   }
 
 
