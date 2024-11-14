@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, TextInput, Switch, Button } from "react-native";
 import { useState } from "react";
 import { useRouter } from "expo-router";
-import { useUser } from "./context/UserContext";
+import { useUser } from "./context/AuthContext";
 
 export default function Page() {
 
@@ -13,7 +13,7 @@ export default function Page() {
 
   const router = useRouter();
 
-  const { setUserNameContext } = useUser()
+  const { setUserName } = useUser()
 
   const handleLogin = async () => {
 
@@ -24,8 +24,7 @@ export default function Page() {
 
       if (user) {
         alert("Login conseguido")
-        setUserNameContext(user.name)
-        // localStorage.setItem("userName", user.name);
+        setUserName(user.name)
         router.push("/homeScreen")
       } else {
         alert("Login fallido")
@@ -65,7 +64,7 @@ export default function Page() {
         if (response.ok) {
           alert("Registro exitoso")
           const nuevoUsuario = await response.json();
-          // localStorage.setItem("userName", nuevoUsuario.name);
+          setUserName(user.name)
         } else {
           alert("Error al registrar el usuario")
         }

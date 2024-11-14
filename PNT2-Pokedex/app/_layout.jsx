@@ -1,15 +1,18 @@
 import { Stack } from "expo-router";
 import { useColorScheme } from "react-native";
-import { UserProvider } from "./context/UserContext";
+import AuthProvider from "./context/AuthContext";
+import PfpProvider from "./context/PfpContext";
 
 export default function RootLayout() {
     const colorScheme = useColorScheme();
     return (
-        <UserProvider>
-            <Stack>
-                <Stack.Screen name="index" options={{ headerShown: false }} />
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            </Stack>
-        </UserProvider>
+        <AuthProvider>
+            <PfpProvider>
+                <Stack>
+                    <Stack.Screen name="index" options={{ headerShown: false }} />
+                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                </Stack>
+            </PfpProvider>
+        </AuthProvider>
     );
 }
