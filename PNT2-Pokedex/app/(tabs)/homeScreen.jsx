@@ -1,22 +1,22 @@
-import React from "react";
-// import { useFonts, ArchivoBlack_400Regular, RubikBubbles_400Regular } from "@expo-google-fonts/archivo-black"; 
-import { View, Text, ImageBackground, FlatList, Image, Dimensions, StyleSheet, ActivityIndicator, ScrollView } from "react-native";
+import React, { useEffect, useState } from "react";
+import { 
+    View, 
+    Text, 
+    ImageBackground, 
+    Image, 
+    StyleSheet, 
+    ScrollView, 
+    TouchableOpacity, 
+    ActivityIndicator 
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import HomeCard from "../componentes/HomeCard";
 
-export default function homeScreen() {
+export default function HomeScreen() {
     const navigation = useNavigation();
-    const { height, width } = Dimensions.get("window");
-
-   
-    // const [fontsLoaded] = useFonts({
-    //     ArchivoBlack_400Regular,
-    //     RubikBubbles_400Regular,
-    // });
-
-    // if (!fontsLoaded) {
-    //     return <ActivityIndicator size="large" color="#0000ff" />;
-    // }
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [pokemons, setPokemons] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const images = [
         require("../../assets/poke_1_1.webp"),
@@ -24,6 +24,39 @@ export default function homeScreen() {
         require("../../assets/poke_3_3.webp"),
         require("../../assets/poke_4_4.png"),
     ];
+
+    const handleNext = () => {
+        if (currentIndex < images.length - 1) {
+            setCurrentIndex(currentIndex + 1);
+        }
+    };
+
+    const handlePrev = () => {
+        if (currentIndex > 0) {
+            setCurrentIndex(currentIndex - 1);
+        }
+    };
+
+    // Fetch Pokemons
+    useEffect(() => {
+        const fetchPokemons = async () => {
+            try {
+                const response = await fetch("https://pokeapi.co/api/v2/pokemon?limit=10"); // Top 10 for highlights
+                const data = await response.json();
+                setPokemons(data.results);
+            } catch (error) {
+                console.error("Error al obtener los Pokémon:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPokemons();
+    }, []);
+
+    if (loading) {
+        return <ActivityIndicator size="large" color="#0000ff" />;
+    }
 
     return (
         <ScrollView style={{ flex: 1 }}>
@@ -33,44 +66,48 @@ export default function homeScreen() {
                 resizeMode="cover"
             >
                 <View style={styles.container}>
-                    <Text style={styles.text}> ORT PokeDex</Text>
+                    <Text style={styles.text}>ORT PokeDex</Text>
                 </View>
-                
-                <FlatList
-                    data={images}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    pagingEnabled
-                    renderItem={({ item }) => (
-                        <Image source={item} style={styles.carouselImage} />
-                    )}
-                    keyExtractor={(item, index) => index.toString()}
-                    style={styles.carouselContainer}
-                    contentContainerStyle={{ justifyContent: "center" }}
-                />
+
+                <View style={styles.carouselContainer}>
+                    <TouchableOpacity onPress={handlePrev} style={styles.arrowContainer}>
+                        <Image 
+                            source={require("../../assets/flecha_izq.png")} 
+                            style={styles.arrow} 
+                        />
+                    </TouchableOpacity>
+
+                    <Image 
+                        source={images[currentIndex]} 
+                        style={styles.carouselImage} 
+                    />
+
+                    <TouchableOpacity onPress={handleNext} style={styles.arrowContainer}>
+                        <Image 
+                            source={require("../../assets/flecha_derecha.png")} 
+                            style={styles.arrow} 
+                        />
+                    </TouchableOpacity>
+                </View>
             </ImageBackground>
 
-           
             <View style={styles.highlightContainer}>
                 <Text style={styles.highlightTitle}>Los destacados de la semana</Text>
 
-              
                 <View style={styles.cardContainer}>
-                    <HomeCard 
-                        nombre="Hola" 
-                        imagen={require("../../assets/poke_4_4.png")}
-                        descripcion="Esta es una descripción de ejemplo" 
-                    />
-                    <HomeCard 
-                        nombre="Hola" 
-                        imagen={require("../../assets/poke_4_4.png")}
-                        descripcion="Esta es una descripción de ejemplo" 
-                    />
-                    <HomeCard 
-                        nombre="Hola" 
-                        imagen={require("../../assets/poke_4_4.png")}
-                        descripcion="Esta es una descripción de ejemplo" 
-                    />
+                    {pokemons.map((pokemon, index) => {
+                        const pokemonId = pokemon.url.split("/")[6];
+                        const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId}.png`;
+
+                        return (
+                            <HomeCard 
+                                key={index}
+                                nombre={pokemon.name}
+                                imagen={{ uri: imageUrl }}
+                                descripcion={`Este es ${pokemon.name}, ¡uno de los Pokémon destacados esta semana!`}
+                            />
+                        );
+                    })}
                 </View>
             </View>
         </ScrollView>
@@ -80,31 +117,41 @@ export default function homeScreen() {
 const styles = StyleSheet.create({
     backgroundHome: {
         flex: 1,
-        height: 800,
         justifyContent: "center",
+        width: "100%",
+        height: "auto",
     },
     container: {
         alignItems: "center",
         justifyContent: "center",
-        padding: 20,
     },
     text: {
-        marginTop: 100,
+        paddingTop: 50,
         fontSize: 30,
-        // fontFamily: 'RubikBubbles',
-        paddingTop: 5,
-        color: "#fff",
+        color: "#000",
         textAlign: "center",
         marginBottom: 20,
+        fontWeight:"bold",
+    
     },
     carouselContainer: {
-        height: 500, 
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
         marginVertical: 10,
     },
     carouselImage: {
-        width: Dimensions.get("window").width,
-        height: 400,
+        width: 300,
+        height: 300,
         resizeMode: "cover",
+    },
+    arrowContainer: {
+        padding: 10,
+    },
+    arrow: {
+        width: 30,
+        height: 30,
+        resizeMode: "contain",
     },
     highlightContainer: {
         alignItems: "center",
@@ -112,17 +159,16 @@ const styles = StyleSheet.create({
     },
     highlightTitle: {
         fontSize: 24,
-        // fontFamily: "ArchivoBlack_400Regular",
         marginBottom: 20,
         color: "#333",
+        fontWeight:800,
+
     },
     cardContainer: {
-        flexDirection: "column",
-        justifyContent: "space-around",
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "space-evenly",
         width: "100%",
-        alignItems:"center",
-        marginBottom: 20, 
+        marginBottom: 20,
     },
-
-})
-;
+});
