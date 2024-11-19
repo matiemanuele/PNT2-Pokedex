@@ -7,16 +7,28 @@ export function useUser() {
   return useContext(AuthContext)
 }
 
-export const AuthProvider = ({ children }) => {
+const AuthProvider = ({ children }) => {
+
   const [userName, setUserName] = useState('');
+  const [currentUser, setCurrentUser] = useState(null)
 
   useEffect(() => {
-    const cargarEstadoAuth = async () => {
-      const storedUserName = await AsyncStorage.getItem("userName");
-      setUserName(storedUserName || '')
+    const loadUserData = async () => {
+      try {
+        const storedUser = await AsyncStorage.getItem('currentUser')
+
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser)
+          setUserName(parsedUser.name)
+          setCurrentUser(parsedUser)
+        }
+      } catch (error) {
+        console.error('Error leading user data', error)
+      }
     }
-    cargarEstadoAuth();
-  }, []);
+    loadUserData()
+  }, [])
+
 
   const login = async (usuario, password) => {
     try {
@@ -25,9 +37,9 @@ export const AuthProvider = ({ children }) => {
       const user = data.find(u => u.user === usuario && u.password === password)
 
       if (user) {
-        await AsyncStorage.setItem("userData", JSON.stringify(user))
-        await AsyncStorage.setItem("userName", user.name)
+        await AsyncStorage.setItem('currentUser', JSON.stringify(user))
         setUserName(user.name);
+        setCurrentUser(user)
         return true
       } else {
         return false
@@ -38,7 +50,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (usuario, email, password, nombre) => {
+  const register = async (usuario, email, password, nombre, profileImage) => {
     try {
       const response = await fetch("https://6711a7964eca2acdb5f554b7.mockapi.io/api/v1/users");
       const data = await response.json();
@@ -47,30 +59,37 @@ export const AuthProvider = ({ children }) => {
 
       if (userExiste) {
         alert("Este usuario ya está registrado");
-      } else if (mailExiste) {
-        alert("Ya existe una cuenta con este email");
-      } else {
-        const response = await fetch("https://6711a7964eca2acdb5f554b7.mockapi.io/api/v1/users", {
-          method: "POST",
-          headers: {
-            "Content-type": "application/json"
-          },
-          body: JSON.stringify({
-            name: nombre,
-            password: password,
-            email: email,
-            user: usuario
-          })
-        });
-
-        if (response.ok) {
-          const nuevoUsuario = await response.json();
-          setUserName(nuevoUsuario.name)
-          return true
-        } else {
-          return null
-        }
+        return false
       }
+      if (mailExiste) {
+        alert("Ya existe una cuenta con este email");
+        return false
+      }
+
+      const response2 = await fetch("https://6711a7964eca2acdb5f554b7.mockapi.io/api/v1/users", {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json"
+        },
+        body: JSON.stringify({
+          name: nombre,
+          password: password,
+          email: email,
+          user: usuario,
+          profilePicture: profileImage
+        })
+      });
+
+      if (response2.ok) {
+        const nuevoUsuario = await response2.json();
+        await AsyncStorage.setItem('currentUser', JSON.stringify(nuevoUsuario))
+        setUserName(nuevoUsuario.name)
+        setCurrentUser(nuevoUsuario)
+        return true
+      } else {
+        return null
+      }
+
     } catch (error) {
       console.error(error);
       return null
@@ -78,7 +97,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ userName, setUserName, login, register }}>
+    <AuthContext.Provider value={{ userName, currentUser, setCurrentUser, login, register }}>
       {children}
     </AuthContext.Provider>
   );

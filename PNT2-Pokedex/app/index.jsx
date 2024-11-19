@@ -2,6 +2,7 @@ import { StyleSheet, Text, View, TextInput, Switch, Button } from "react-native"
 import { useState } from "react";
 import { useRouter } from "expo-router";
 import { useUser } from "./context/AuthContext";
+import { usePfp } from "./context/PfpContext";
 
 export default function Page() {
 
@@ -14,6 +15,7 @@ export default function Page() {
   const router = useRouter();
 
   const { login, register } = useUser()
+  const { randomProfileImage } = usePfp()
 
   const handleLogin = async () => {
     const result = await login(usuario, password)
@@ -28,7 +30,8 @@ export default function Page() {
   }
 
   const handleRegister = async () => {
-    const result = await register(usuario, email, password, nombre)
+    const profileImage = await randomProfileImage()
+    const result = await register(usuario, email, password, nombre, profileImage)
       if (result === true) {
         alert("Registro exitoso")
       } else if (result === false) {

@@ -1,32 +1,35 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 const PfpContext = createContext()
 
-export function UsePfp() {
+export function usePfp() {
     return useContext(PfpContext)
 }
 
-export const PfpProvider = ({ children }) => {
+const PfpProvider = ({ children }) => {
 
-    const [pokemonImage, setPokemonImage] = useState('')
+    const [profileImage, setProfileImage] = useState('')
 
-    const savePokemonImage = async (imageUri) => {
-        try {
-            await AsyncStorage.setItem("pokemonImage", imageUri)
-            setPokemonImage(imageUri)
-        } catch (error) {
-            console.error("Failed to save Pokemon image", error)
+    const randomProfileImage = async () => {
+        if (!profileImage) {
+            const randomId = Math.floor(Math.random() * 898) + 1;
+            const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${randomId}`);
+            const data = await response.json();
+            const newProfileImage = data.sprites.front_default
+
+            await AsyncStorage.setItem('profileImage', newProfileImage)
+
+            setProfileImage(newProfileImage);
+            return newProfileImage
         }
     }
 
-
     return (
-        <PfpContext.Provider value={{ pokemonImage, savePokemonImage }}>
+        <PfpContext.Provider value={{ profileImage, setProfileImage, randomProfileImage }}>
             {children}
         </PfpContext.Provider>
     )
 }
-
 
 export default PfpProvider
