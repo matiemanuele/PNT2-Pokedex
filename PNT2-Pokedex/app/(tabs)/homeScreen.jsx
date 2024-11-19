@@ -9,11 +9,9 @@ import {
     TouchableOpacity, 
     ActivityIndicator 
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import HomeCard from "../componentes/HomeCard";
 
 export default function HomeScreen() {
-    const navigation = useNavigation();
     const [currentIndex, setCurrentIndex] = useState(0);
     const [pokemons, setPokemons] = useState([]);
     const [loading, setLoading] = useState(true);
