@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { useFavoritePokemons } from "../context/FavoritePokemonContext"; 
+import { useRouter } from 'expo-router'; 
 
 export default function PokedexScreen() {
     const [pokemons, setPokemons] = useState([]);
     const [loading, setLoading] = useState(true);
     const { addFavoritePokemon, removeFavoritePokemon, favoritePokemons } = useFavoritePokemons();
+    const router = useRouter();
 
     useEffect(() => {
         const fetchPokemons = async () => {
@@ -37,27 +39,20 @@ export default function PokedexScreen() {
     }, []);
 
     const renderItem = ({ item }) => (
+        <TouchableOpacity
+        style={styles.touchable}
+            key={item.id}
+            onPress={() => router.push(`/componentes/${item.id}`)}
+        > 
+        
         <View style={styles.item}>
             <Image source={{ uri: item.image }} style={styles.image} />
             <Text style={styles.pokemonName}>{item.name}</Text>
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => {
-                    if (favoritePokemons.find((pokemon) => pokemon.id === item.id)) {
-                        removeFavoritePokemon(item.id); 
-                    } else {
-                        addFavoritePokemon(item); 
-                    }
-                }}
-            >
-                <Text style={styles.buttonText}>
-                    {favoritePokemons.find((pokemon) => pokemon.id === item.id)
-                        ? "Quitar de Favoritos"
-                        : "Agregar a Favoritos"}
-                </Text>
-            </TouchableOpacity>
         </View>
+
+        </TouchableOpacity>
     );
+    
 
     if (loading) {
         return <Text style={styles.loading}>Cargando...</Text>;
@@ -124,4 +119,34 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontWeight: "bold",
     },
+    touchable:{
+        flex: 1,
+        margin: 10,
+        maxWidth: '45%'
+    },
 });
+
+/*
+const renderItem = ({ item }) => (
+        <View style={styles.item}>
+            <Image source={{ uri: item.image }} style={styles.image} />
+            <Text style={styles.pokemonName}>{item.name}</Text>
+            <TouchableOpacity
+                style={styles.button}
+                onPress={() => {
+                    if (favoritePokemons.find((pokemon) => pokemon.id === item.id)) {
+                        removeFavoritePokemon(item.id); 
+                    } else {
+                        addFavoritePokemon(item); 
+                    }
+                }}
+            >
+                <Text style={styles.buttonText}>
+                    {favoritePokemons.find((pokemon) => pokemon.id === item.id)
+                        ? "Quitar de Favoritos"
+                        : "Agregar a Favoritos"}
+                </Text>
+            </TouchableOpacity>
+        </View>
+    );
+    */
