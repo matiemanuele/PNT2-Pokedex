@@ -68,26 +68,43 @@ const PokemonDetail = () => {
         <Text>No se encontró imagen del pokemon</Text>
       )}
 
-      <Text style={styles.subTitle}>Habilidades:</Text>
+
+      <View style = {styles.card}>
+<Text style={styles.subTitle}>Habilidades:</Text>
       {pokemon.abilities.map((ability) => (
         <Text style={styles.descripcion} key={ability.ability.name}>
           {ability.ability.name}
         </Text>
       ))}
+      </View>
+      
 
-      <Text style={styles.subTitle}>Tipos:</Text>
+
+
+      <View style = {styles.card}>
+
+<Text style={styles.subTitle}>Tipos:</Text>
       {pokemon.types.map((type) => (
         <Text style={styles.descripcion} key={type.type.name}>
           {type.type.name}
         </Text>
       ))}
+      </View>
+      
 
-      <Text style={styles.subTitle}>Movimientos:</Text>
+      
+      <View style = {styles.card}>
+<Text style={styles.subTitle}>Movimientos:</Text>
       {pokemon.moves.slice(0, 5).map((move) => (
         <Text style={styles.descripcion} key={move.move.name}>
           {move.move.name}
         </Text>
       ))}
+      </View>
+
+      
+      
+      <View style = {styles.card}>
 
       <Text style={styles.subTitle}>Estadísticas:</Text>
       {pokemon.stats.map((stat) => (
@@ -95,11 +112,17 @@ const PokemonDetail = () => {
           {stat.stat.name}: {stat.base_stat}
         </Text>
       ))}
+      </View>
 
-      <Text style={styles.subTitle}>Altura: </Text>
+
+      <View style = {styles.card}>
+   <Text style={styles.subTitle}>Altura: </Text>
       <Text style={styles.descripcion}>{pokemon.height / 10} metros</Text>
       <Text style={styles.subTitle}>Peso: </Text>
       <Text style={styles.descripcion}>{pokemon.weight / 10} kilogramos</Text>
+      </View>
+
+   
 
       <View style={styles.buttonContainer}>
         {!isFavorite ? (
@@ -129,7 +152,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: "bold",
     color: "#333",
     textAlign: "center",
@@ -141,26 +164,34 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#2e2e2e",
     marginTop: 20,
-    textAlign: "left",
-    width: "100%",
     paddingHorizontal: 10,
   },
   descripcion: {
     fontSize: 16,
     color: "gray",
-    marginTop: 10,
-    marginBottom: 20,
+    marginTop: 5,
+    marginBottom: 10,
     textAlign: "center",
   },
   image: {
-    width: 250,
-    height: 250,
+    width: "100%",
+    height: 300,
     marginBottom: 20,
   },
-  button: {
-    marginVertical: 10,
-    width: "80%",
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 20,
+    elevation: 5, // Shadow effect for Android
+    shadowColor: "#000", // Shadow effect for iOS
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
   },
+  buttonContainer: {
+    marginTop: 20,
+    alignItems: "center",},
 });
 
 export default PokemonDetail;
