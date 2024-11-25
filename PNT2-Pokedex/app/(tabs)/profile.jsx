@@ -4,15 +4,57 @@ import { useFavoritePokemons } from '../context/FavoritePokemonContext';
 import { usePfp } from '../context/PfpContext';
 import usePokemonData from '../../components/usePokemonData';
 import { useUser } from '../context/AuthContext';
+import { useRouter } from 'expo-router';
+
 
 const ProfileTab = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const { setProfileImage } = usePfp();
-  const { favoritePokemons } = useFavoritePokemons();
   const [modalVisible, setModalVisible] = useState(false)
   const [displayPokemons, setDisplayPokemons] = useState([])
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { profileImage, setProfileImage } = usePfp();
+  const { currentUser, setCurrentUser } = useUser()
+  const { favoritePokemons } = useFavoritePokemons();
   const { pokemons, loading } = usePokemonData()
-  const {currentUser, setCurrentUser} = useUser()
+
+  const router = useRouter()
+
+  useEffect(() => {
+    // Sincronizar la imagen desde la base de datos si no coincide con `profileImage`
+    const syncProfileImage = async () => {
+      try {
+        if (currentUser?.profilePicture && currentUser.profilePicture !== profileImage) {
+          setProfileImage(currentUser.profilePicture);
+        }
+      } catch (error) {
+        console.error('Error al sincronizar la imagen de perfil:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    syncProfileImage();
+  }, [currentUser, profileImage, setProfileImage]);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch(`https://6711a7964eca2acdb5f554b7.mockapi.io/api/v1/users/${currentUser.id}`);
+        if (!response.ok) {
+          throw new Error('Error al cargar los datos del usuario');
+        }
+        const userData = await response.json();
+        setCurrentUser(userData); // Actualiza el usuario en el contexto
+      } catch (error) {
+        console.error('Error al cargar el usuario:', error);
+        alert('No se pudieron cargar los datos del usuario.');
+      }
+    };
+
+    if (currentUser?.id) {
+      fetchUserData();
+    }
+  }, []);
 
   const loadRandomPokemons = async () => {
     if (pokemons.length === 0) return
@@ -83,6 +125,15 @@ const ProfileTab = () => {
     }
   }, [modalVisible, pokemons])
 
+  const handleLogout = () => {
+    setCurrentUser(null)
+    setProfileImage(null)
+    router.replace({ pathname: '/' })
+  };
+
+  if (isLoading) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
 
   return (
     <View style={styles.container}>
@@ -93,7 +144,7 @@ const ProfileTab = () => {
           <ActivityIndicator size="large" color="#0000ff" />
         ) : currentUser?.profilePicture ? (
           <Image
-            source={{ uri: currentUser.profilePicture }}
+            source={{ uri: profileImage }}
             style={styles.profilePicture}
           />
         ) : (
@@ -175,6 +226,11 @@ const ProfileTab = () => {
           )}
         />
       )}
+      <Button
+        title="Cerrar Sesión"
+        onPress={handleLogout}
+        color="red"
+      />
     </View>
   );
 };
