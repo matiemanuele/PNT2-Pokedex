@@ -54,6 +54,19 @@ export default function TabsLayout() {
                         ),
                     }}
                 />
+                <Tabs.Screen 
+                    name="map"
+                    options={{
+                            title: "Mapa",
+                            tabBarIcon: ({ color, focused }) => (
+                                <Ionicons
+                                    size={28}
+                                    name={focused ? "map" : "map-outline"}
+                                    color={color}
+                                />
+                            ),
+                    }}
+                />
             </Tabs>
         </FavoritePokemonProvider>
     );
