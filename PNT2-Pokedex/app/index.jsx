@@ -1,8 +1,9 @@
-import { StyleSheet, Text, View, TextInput, Switch, Button } from "react-native";
+import { StyleSheet, Text, View, TextInput, Switch, Button, Image } from "react-native";
 import { useState } from "react";
 import { useRouter } from "expo-router";
 import { useUser } from "./context/AuthContext";
 import { usePfp } from "./context/PfpContext";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function Page() {
 
@@ -10,6 +11,7 @@ export default function Page() {
   const [email, setEmail] = useState("");
   const [usuario, setUsuario] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [nombre, setNombre] = useState("");
 
   const router = useRouter();
@@ -32,126 +34,167 @@ export default function Page() {
   const handleRegister = async () => {
     const profileImage = await randomProfileImage()
     const result = await register(usuario, email, password, nombre, profileImage)
-      if (result === true) {
-        alert("Registro exitoso")
-      } else if (result === false) {
-        alert("Usuario o email ya registrado")
-      } else {
-        alert("Error en la autenticación")
-      }
+    if (result === true) {
+      alert("Registro exitoso")
+    } else if (result === false) {
+      alert("Usuario o email ya registrado")
+    } else {
+      alert("Error en la autenticación")
+    }
   }
-
 
   return (
     <View style={styles.container}>
+      <Image
+        source={{ uri: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png" }}
+        style={styles.logo}
+      />
+      <Text style={styles.title}>¡Bienvenido a la Pokedex!</Text>
+      <Text style={styles.subtitle}>
+        {esLogin ? "Inicia sesión para continuar" : "Crea tu cuenta para empezar"}
+      </Text>
+
       <View style={styles.main}>
-        <Text style={styles.title}>Bienvenido</Text>
-        <Text style={styles.subtitle}>{esLogin ? "Inicia sesión con tu cuenta" : "Crea una cuenta"}</Text>
-        <Text>Usuario: </Text>
+        <Text style={styles.label}>Usuario:</Text>
         <TextInput
           style={styles.input}
-          placeholder="Nombre usuario"
+          placeholder="Nombre de usuario"
           value={usuario}
           onChangeText={setUsuario}
         />
-        {
-          !esLogin && (
-            <>
-              <Text>Email: </Text>
-              <TextInput style={styles.input}
-                placeholder="email@gmail.com"
-                value={email}
-                onChangeText={setEmail}
-              />
+        {!esLogin && (
+          <>
+            <Text style={styles.label}>Email:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="email@gmail.com"
+              value={email}
+              onChangeText={setEmail}
+            />
+            <Text style={styles.label}>Nombre:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Tu nombre"
+              value={nombre}
+              onChangeText={setNombre}
+            />
+          </>
+        )}
+        <Text style={styles.label}>Contraseña:</Text>
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            secureTextEntry={!showPassword}
+            placeholder="Contraseña"
+            value={password}
+            onChangeText={setPassword}
+          />
+          <Ionicons
+            name={showPassword ? "eye-off" : "eye"}
+            size={24}
+            color="gray"
+            onPress={() => setShowPassword(!showPassword)}
+          />
+        </View>
+      </View>
 
-              <Text>Nombre: </Text>
-              <TextInput style={styles.input}
-                placeholder="nombre"
-                value={nombre}
-                onChangeText={setNombre}
-              />
-            </>
-          )
-        }
-        <Text>Contraseña: </Text>
-        <TextInput style={styles.input}
-          secureTextEntry={true}
-          placeholder="contraseña"
-          value={password}
-          onChangeText={setPassword}
+      <View style={styles.buttonContainer}>
+        <Button
+          title={esLogin ? "Iniciar sesión" : "Registrarse"}
+          onPress={esLogin ? handleLogin : handleRegister}
+          color={esLogin ? "#007bff" : "#28a745"}
         />
       </View>
-      <View style={styles.boton}>
 
-        {esLogin ?
-          (<Button title={"Iniciar sesión"} onPress={handleLogin} />
-
-          )
-          //<Pressable style={styles.button} onPress={onPress}>
-          //  <Text style={styles.text}>Iniciar sesión:</Text>
-          //</Pressable>
-
-          :
-          (<Button title={"Registrarse"} onPress={handleRegister} />)}
-
-
-      </View>
-
-      <View>
-        <Text>{esLogin ? "Cambia a registrarse" : "Cambia a login"} </Text>
-        <Switch value={esLogin} onValueChange={() => setLogin(!esLogin)} />
+      <View style={styles.switchContainer}>
+        <Text style={styles.switchText}>
+          {esLogin ? "¿No tienes cuenta? Regístrate" : "¿Ya tienes cuenta? Inicia sesión"}
+        </Text>
+        <Switch
+          value={esLogin}
+          onValueChange={() => setLogin(!esLogin)}
+          thumbColor={esLogin ? "#007bff" : "#28a745"}
+          trackColor={{ false: "#d6d6d6", true: "#a3d9a5" }}
+        />
       </View>
     </View>
   );
+
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    padding: 24,
-    backgroundColor: '#f1f1f1',
-  },
-  main: {
-    flex: 1,
     justifyContent: "center",
-    maxWidth: 960,
-    marginHorizontal: "auto",
+    backgroundColor: "#f1f1f1",
+    padding: 20,
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    marginBottom: 20,
   },
   title: {
-    fontSize: 64,
+    fontSize: 28,
     fontWeight: "bold",
+    color: "#333",
+    textAlign: "center",
+    marginBottom: 10,
   },
   subtitle: {
-    fontSize: 36,
-    color: "gray",
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  main: {
+    width: "100%",
+    paddingHorizontal: 20,
+  },
+  label: {
+    fontSize: 14,
+    color: "#333",
+    marginBottom: 5,
   },
   input: {
+    width: "100%",
+    height: 45,
+    backgroundColor: "#fff",
+    borderColor: "#ddd",
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    marginBottom: 15,
+  },
+  buttonContainer: {
+    marginVertical: 20,
+    width: "100%",
+  },
+  switchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
+  },
+  switchText: {
+    fontSize: 14,
+    color: "#555",
+    marginRight: 10,
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 1,
     borderColor: "gray",
-    padding: 10,
-    paddingStart: 20,
-    width: "80%",
-    height: 50,
-    marginTop: 20,
-    borderRadius: 30,
+    borderRadius: 8,
+    paddingHorizontal: 10,
     backgroundColor: "#fff",
-
+    marginBottom: 20,
   },
-  button: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 30,
-    elevation: 3,
-    backgroundColor: 'black',
-  },
-  text: {
+  passwordInput: {
+    flex: 1,
+    padding: 10,
     fontSize: 16,
-    lineHeight: 21,
-    fontWeight: 'bold',
-    letterSpacing: 0.25,
-    color: 'white',
   },
 });

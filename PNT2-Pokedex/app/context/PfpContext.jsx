@@ -30,11 +30,15 @@ const PfpProvider = ({ children }) => {
         loadProfileImage();
     }, []);
 
-    // Actualizar `AsyncStorage` cuando se cambia la imagen
     const updateProfileImage = async (newProfileImage) => {
         try {
-            await AsyncStorage.setItem('profileImage', newProfileImage);
-            setProfileImage(newProfileImage);
+            if (newProfileImage) {
+                await AsyncStorage.setItem('profileImage', newProfileImage);
+                setProfileImage(newProfileImage);
+            } else {
+                await AsyncStorage.removeItem('profileImage');
+                setProfileImage(null);
+            }
         } catch (error) {
             console.error('Error al guardar la imagen de perfil:', error);
         }

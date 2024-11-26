@@ -88,11 +88,11 @@ const styles = StyleSheet.create({
     },
     item: {
         flex: 1,
-        margin: 10,
+        margin: 5,
         alignItems: "center",
         backgroundColor: "#f0f0f0",
         borderRadius: 10,
-        padding: 10,
+        padding: 5,
     },
     image: {
         width: 80,
@@ -100,8 +100,10 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     pokemonName: {
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: "bold",
+        textAlign: "center",
+        flexWrap: "wrap",
     },
     loading: {
         fontSize: 20,
@@ -124,9 +126,9 @@ const styles = StyleSheet.create({
     buttonActive: {
         backgroundColor: "red"
     },
-    touchable:{
+    touchable: {
         flex: 1,
-        margin: 10,
-        maxWidth: '45%'
-    },
+        margin: 5,
+        maxWidth: "30%",
+    },
 });

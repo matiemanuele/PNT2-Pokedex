@@ -5,6 +5,7 @@ import { usePfp } from '../context/PfpContext';
 import usePokemonData from '../../components/usePokemonData';
 import { useUser } from '../context/AuthContext';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 
 const ProfileTab = () => {
@@ -20,7 +21,6 @@ const ProfileTab = () => {
   const router = useRouter()
 
   useEffect(() => {
-    // Sincronizar la imagen desde la base de datos si no coincide con `profileImage`
     const syncProfileImage = async () => {
       try {
         if (currentUser?.profilePicture && currentUser.profilePicture !== profileImage) {
@@ -44,7 +44,7 @@ const ProfileTab = () => {
           throw new Error('Error al cargar los datos del usuario');
         }
         const userData = await response.json();
-        setCurrentUser(userData); // Actualiza el usuario en el contexto
+        setCurrentUser(userData);
       } catch (error) {
         console.error('Error al cargar el usuario:', error);
         alert('No se pudieron cargar los datos del usuario.');
@@ -141,7 +141,7 @@ const ProfileTab = () => {
 
       <View style={styles.profileSection}>
         {isLoading ? (
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="large" color="#007bff" />
         ) : currentUser?.profilePicture ? (
           <Image
             source={{ uri: profileImage }}
@@ -149,14 +149,18 @@ const ProfileTab = () => {
           />
         ) : (
           <View style={styles.placeholderImage}>
+            <Ionicons name="person-circle-outline" size={60} color="#aaa" />
             <Text>No hay imagen de perfil</Text>
           </View>
         )}
-        <Button
-          title="Cambiar imagen"
+        <TouchableOpacity
+          style={styles.button}
           onPress={() => setModalVisible(true)}
           disabled={loading}
-        />
+        >
+          <Ionicons name="camera" size={16} color="#fff" />
+          <Text style={styles.buttonText}>Cambiar imagen</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Modal de selección de Pokémon */}
@@ -166,42 +170,47 @@ const ProfileTab = () => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalView}>
-          <Text style={styles.modalTitle}>Elige tu Pokémon</Text>
+        <View style={styles.modalBackground}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalTitle}>Elige tu Pokémon</Text>
 
-          {loading ? (
-            <ActivityIndicator size="large" color="#0000ff" />
-          ) : (
-            <FlatList
-              data={displayPokemons}
-              numColumns={3}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.spriteOption}
-                  onPress={() => selectProfilePicture(item.sprite)}
-                >
-                  <Image
-                    source={{ uri: item.sprite }}
-                    style={styles.spriteImage}
-                  />
-                  <Text style={styles.spriteName}>{item.name}</Text>
-                </TouchableOpacity>
-              )}
-            />
-          )}
+            {loading ? (
+              <ActivityIndicator size="large" color="#007bff" />
+            ) : (
+              <FlatList
+                data={displayPokemons}
+                numColumns={3}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.spriteOption}
+                    onPress={() => selectProfilePicture(item.sprite)}
+                  >
+                    <Image
+                      source={{ uri: item.sprite }}
+                      style={styles.spriteImage}
+                    />
+                    <Text style={styles.spriteName}>{item.name}</Text>
+                  </TouchableOpacity>
+                )}
+                contentContainerStyle={styles.flatListContainer}
+                showsVerticalScrollIndicator={false}
+              />
+            )}
 
-          <View style={styles.modalButtons}>
-            <Button
-              title="Más opciones"
-              onPress={loadRandomPokemons}
-              disabled={loading}
-            />
-            <Button
-              title="Cancelar"
-              onPress={() => setModalVisible(false)}
-              color="red"
-            />
+            <View style={styles.modalButtons}>
+              <Button
+                title="Más opciones"
+                onPress={loadRandomPokemons}
+                disabled={loading}
+                color="#007bff"
+              />
+              <Button
+                title="Cancelar"
+                onPress={() => setModalVisible(false)}
+                color="red"
+              />
+            </View>
           </View>
         </View>
       </Modal>
@@ -226,11 +235,10 @@ const ProfileTab = () => {
           )}
         />
       )}
-      <Button
-        title="Cerrar Sesión"
-        onPress={handleLogout}
-        color="red"
-      />
+      <TouchableOpacity style={[styles.button, { backgroundColor: "red", marginTop: 20 }]} onPress={handleLogout}>
+        <Ionicons name="exit-outline" size={16} color="#fff" />
+        <Text style={styles.buttonText}>Cerrar Sesión</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -240,122 +248,147 @@ const ProfileTab = () => {
 
 const styles = StyleSheet.create({
   container: {
-  flex: 1,
-  alignItems: 'center',
-  padding: 24,
-  backgroundColor: '#f7f7f7',
-},
-profileSection: {
-  alignItems: 'center',
-  marginVertical: 20,
-},
-userName: {
-  fontSize: 26,
-  fontWeight: 'bold',
-  marginBottom: 20,
-  color: '#333',
-},
-profilePicture: {
-  width: 120,
-  height: 120,
-  borderRadius: 60,
-  marginBottom: 10,
-  borderWidth: 3,
-  borderColor: '#007bff',
-},
-placeholderImage: {
-  width: 120,
-  height: 120,
-  borderRadius: 60,
-  backgroundColor: '#ddd',
-  justifyContent: 'center',
-  alignItems: 'center',
-  marginBottom: 10,
-},
-title: {
-  fontSize: 22,
-  fontWeight: 'bold',
-  marginVertical: 15,
-  color: '#333',
-},
-emptyMessage: {
-  marginTop: 20,
-  color: '#666',
-},
-pokemonCard: {
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: 12,
-  margin: 8,
-  borderWidth: 1,
-  borderColor: '#ddd',
-  borderRadius: 10,
-  backgroundColor: '#fff',
-  width: 100,
-},
-pokemonName: {
-  fontSize: 14,
-  color: '#333',
-  marginBottom: 5,
-},
-pokemonImage: {
-  width: 60,
-  height: 60,
-},
-modalView: {
-  margin: 20,
-  backgroundColor: "white",
-  borderRadius: 10,
-  padding: 25,
-  alignItems: "center",
-  justifyContent: "center",
-  shadowColor: "#000",
-  shadowOffset: {
-    width: 0,
-    height: 2,
+    flex: 1,
+    alignItems: 'center',
+    padding: 24,
+    backgroundColor: '#f7f7f7',
   },
-  shadowOpacity: 0.25,
-  shadowRadius: 4,
-  elevation: 5,
-},
-modalTitle: {
-  fontSize: 22,
-  fontWeight: "bold",
-  marginBottom: 15,
-  textAlign: "center",
-  color: "#333",
-},
-spriteOption: {
-  width: 100,
-  height: 100,
-  margin: 12,
-  borderRadius: 10,
-  backgroundColor: "#f0f0f0",
-  justifyContent: "center",
-  alignItems: "center",
-  borderWidth: 1,
-  borderColor: "#ddd",
-},
-spriteImage: {
-  width: 80,
-  height: 80,
-  resizeMode: "contain",
-},
-spriteName: {
-  marginTop: 8,
-  fontSize: 16,
-  fontWeight: "600",
-  textAlign: "center",
-  color: "#444",
-},
-modalButtons: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  marginTop: 25,
-  width: '100%',
-},
-
-
+  profileSection: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  userName: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#333',
+  },
+  profilePicture: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginBottom: 10,
+    borderWidth: 3,
+    borderColor: '#007bff',
+  },
+  placeholderImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#ddd',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginVertical: 15,
+    color: '#333',
+  },
+  emptyMessage: {
+    marginTop: 20,
+    color: '#666',
+  },
+  pokemonCard: {
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 10,
+    margin: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    width: 100,
+    height: 120,
+  },
+  pokemonImage: {
+    width: 60,
+    height: 60,
+  },
+  pokemonName: {
+    fontSize: 12,
+    textAlign: 'center',
+    color: '#333',
+    marginTop: 5,
+    maxWidth: '90%',
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalView: {
+    width: '90%',
+    height: '80%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+    color: '#333',
+  },
+  flatListContainer: {
+    alignItems: 'center',
+    paddingBottom: 20,
+  },
+  spriteOption: {
+    width: '30%',
+    aspectRatio: 1,
+    margin: 5,
+    borderRadius: 10,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  spriteImage: {
+    width: '70%',
+    height: '70%',
+    resizeMode: 'contain',
+  },
+  spriteName: {
+    marginTop: 8,
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
+    color: '#444',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    width: '100%',
+  },
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#007bff',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    marginVertical: 10,
+  },
+  buttonText: {
+    marginLeft: 8,
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
 });
+
 
 export default ProfileTab;
