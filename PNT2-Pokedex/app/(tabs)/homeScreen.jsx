@@ -35,11 +35,10 @@ export default function HomeScreen() {
         }
     };
 
-    // Fetch Pokemons
     useEffect(() => {
         const fetchPokemons = async () => {
             try {
-                const response = await fetch("https://pokeapi.co/api/v2/pokemon?limit=10"); // Top 10 for highlights
+                const response = await fetch("https://pokeapi.co/api/v2/pokemon?limit=10");
                 const data = await response.json();
                 setPokemons(data.results);
             } catch (error) {
@@ -98,7 +97,7 @@ export default function HomeScreen() {
                         const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId}.png`;
 
                         return (
-                            <HomeCard
+                            <HomeCard //la homecard
                                 key={index}
                                 nombre={pokemon.name}
                                 imagen={{ uri: imageUrl }}

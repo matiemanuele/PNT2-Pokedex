@@ -107,7 +107,7 @@ export default function TabsLayout() {
             <Tabs.Screen
                 name="usuarios"
                 options={{
-                    href: currentUser?.user !== 'admin' ? null : undefined,
+                    href: currentUser?.user !== 'admin' ? null : undefined, //Se muestra si es admin
                     title: "Users",
                     tabBarIcon: ({ focused }) => (
                         <View style={styles.tabIconContainer}>

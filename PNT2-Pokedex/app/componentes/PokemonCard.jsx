@@ -24,7 +24,6 @@ const PokemonDetail = () => {
         Alert.alert("Error", "No se pudo cargar el detalle del Pokémon");
       }
     };
-
     fetchPokemon();
   }, [id]);
 
@@ -145,17 +144,17 @@ const PokemonDetail = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F0F4F8", // Light background
+    backgroundColor: "#F0F4F8",
   },
   headerContainer: {
-    backgroundColor: "#FFCB05", // Pikachu Yellow
+    backgroundColor: "#FFCB05",
     paddingVertical: 20,
     alignItems: "center",
   },
   title: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#3B4CCA", // Pokemon Blue
+    color: "#3B4CCA",
     textAlign: "center",
     marginBottom: 15,
     textTransform: "capitalize",
@@ -211,12 +210,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#3B4CCA", // Pokemon Blue
+    backgroundColor: "#3B4CCA",
     padding: 15,
     borderRadius: 10,
   },
   buttonRemove: {
-    backgroundColor: "#FF1C1C", // Vibrant Red
+    backgroundColor: "#FF1C1C",
   },
   buttonText: {
     color: "#FFFFFF",

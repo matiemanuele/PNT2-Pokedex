@@ -28,10 +28,10 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         borderWidth: 2,
-        borderColor: "#FFCB05", // Pikachu Yellow
+        borderColor: "#FFCB05",
     },
     imageContainer: {
-        backgroundColor: "#4F7CAC", // Pokéball Blue
+        backgroundColor: "#4F7CAC",
         padding: 10,
         alignItems: "center",
     },
@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: "bold",
         marginBottom: 5,
-        color: "#3B4CCA", // Pokemon Blue
+        color: "#3B4CCA",
         textTransform: 'capitalize',
         textAlign: "center",
     },

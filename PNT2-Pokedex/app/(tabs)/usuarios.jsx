@@ -28,8 +28,7 @@ export default function Usuarios() {
     }
   };
 
-  // Filtrar usuarios, excluyendo el de id 0
-  const usuariosFiltrados = usuarios.filter((usuario) => usuario.id !== "0");
+  const usuariosFiltrados = usuarios.filter((usuario) => usuario.id !== "0")
 
   return (
     <View style={styles.container}>

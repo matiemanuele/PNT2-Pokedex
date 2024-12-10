@@ -11,9 +11,9 @@ export default function Page() {
 
   const router = useRouter();
   const { login, register } = useUser();
-  const colorScheme = useColorScheme(); // Obtiene el esquema de color del dispositivo
+  const colorScheme = useColorScheme();
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field, value) => { //Cambia el valor del atributo segun lo recibido
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -70,7 +70,7 @@ export default function Page() {
             placeholder="Contraseña"
             value={formData.password}
             onChangeText={(text) => handleInputChange("password", text)}
-            onSubmitEditing={handleAction} // Llama a la acción al presionar Enter
+            onSubmitEditing={handleAction} // ejecuta al presionar enter
           />
           <Ionicons
             name={showPassword ? "eye-off" : "eye"}

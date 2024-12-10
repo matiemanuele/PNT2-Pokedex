@@ -50,7 +50,7 @@ const AuthProvider = ({ children }) => {
     const defaultImage = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/dream-world/poke-ball.png"
 
     try {
-      const response = await fetch("https://6711a7964eca2acdb5f554b7.mockapi.io/api/v1/users");
+      const response = await fetch("https://6711a7964eca2acdb5f554b7.mockapi.io/api/v1/users"); //Verifica si el usuario existe
       const data = await response.json();
 
       if (usuario === 'admin') {
@@ -66,7 +66,7 @@ const AuthProvider = ({ children }) => {
         return false;
       }
 
-      const newUserResponse = await fetch("https://6711a7964eca2acdb5f554b7.mockapi.io/api/v1/users", {
+      const newUserResponse = await fetch("https://6711a7964eca2acdb5f554b7.mockapi.io/api/v1/users", { //Intenta ingresar el usuario a la api
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

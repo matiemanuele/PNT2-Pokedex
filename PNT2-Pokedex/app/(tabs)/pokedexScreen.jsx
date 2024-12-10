@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient"; // Note: You'll need to install expo-linear-gradient
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function PokedexScreen() {
     const [pokemons, setPokemons] = useState([]);
@@ -38,7 +38,6 @@ export default function PokedexScreen() {
         fetchPokemons();
     }, []);
 
-    // Function to get background color based on Pokemon type
     const getTypeColor = (type) => {
         const typeColors = {
             fire: ['#FF6C04', '#FF9900'],
@@ -63,15 +62,14 @@ export default function PokedexScreen() {
         return typeColors[type] || ['#A8A878', '#C6C6A7']; // default to normal type
     };
 
-    const renderItem = ({ item }) => {
-        // Use the first type for background gradient
+    const renderItem = ({ item }) => { //renderiza cada pokemon de la lista
         const typeColor = getTypeColor(item.types[0]);
 
         return (
             <TouchableOpacity
                 style={styles.touchable}
                 key={item.id}
-                onPress={() => router.push(`/componentes/PokemonCard?id=${item.id}`)}
+                onPress={() => router.push(`/componentes/PokemonCard?id=${item.id}`)} //ruta a la pokemon card
             >
                 <LinearGradient
                     colors={typeColor}

@@ -9,9 +9,9 @@ export function usePfp() {
 
 const PfpProvider = ({ children }) => {
   const [profileImage, setProfileImage] = useState(null);
-  const defaultImage = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/dream-world/poke-ball.png"; // Imagen predeterminada (Pikachu)
+  const defaultImage = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/dream-world/poke-ball.png" //imagen inicial
 
-  // Cargar la imagen guardada al iniciar
+
   useEffect(() => {
     const loadProfileImage = async () => {
       try {
@@ -32,7 +32,7 @@ const PfpProvider = ({ children }) => {
       } else {
         await AsyncStorage.removeItem("profileImage");
       }
-      setProfileImage(newImage || defaultImage); // Actualiza el estado local
+      setProfileImage(newImage || defaultImage)
     } catch (error) {
       console.error("Error al actualizar la imagen de perfil:", error);
     }
@@ -49,7 +49,7 @@ const PfpProvider = ({ children }) => {
 
   const removeProfileImageFromServer = async (userId) => {
     try {
-      const updatedUser = { profilePicture: null }; // Solo actualizamos la imagen
+      const updatedUser = { profilePicture: null }
       const response = await fetch(
         `https://6711a7964eca2acdb5f554b7.mockapi.io/api/v1/users/${userId}`,
         {
@@ -61,11 +61,11 @@ const PfpProvider = ({ children }) => {
 
       if (!response.ok) throw new Error("Error al eliminar la imagen en el servidor");
 
-      await AsyncStorage.removeItem("profileImage"); // También eliminamos del almacenamiento local
-      setProfileImage(defaultImage); // Restablece la imagen predeterminada
+      await AsyncStorage.removeItem("profileImage")
+      setProfileImage(defaultImage)
     } catch (error) {
       console.error("Error al eliminar la imagen en el servidor:", error);
-      throw error; // Lanza el error para manejarlo en la interfaz
+      throw error
     }
   };
 

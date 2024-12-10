@@ -20,21 +20,18 @@ const ProfileTab = () => {
 
   const router = useRouter();
 
-  // Sincronización inicial del perfil
   useEffect(() => {
     if (currentUser?.profilePicture) {
       setProfileImage(currentUser.profilePicture);
     }
   }, [currentUser]);
 
-  // Cargar datos del usuario al montar
   useEffect(() => {
     if (currentUser?.id) {
       fetchUserData(currentUser.id);
     }
   }, []);
 
-  // Manejo del modal y pokémones aleatorios
   useEffect(() => {
     if (modalVisible && pokemons.length > 0) {
       loadRandomPokemons();
@@ -88,13 +85,13 @@ const ProfileTab = () => {
         }
       );
       if (!response.ok) throw new Error('Error al actualizar la imagen de perfil');
-      // const updatedData = await response.json();
+
       setProfileImage(spriteUrl);
       setCurrentUser((prevUser) => ({
         ...prevUser,
         profilePicture: spriteUrl,
       }));
-      setModalVisible(false);
+      setModalVisible(false); //cierra el modal al elegir la foto
     } catch (error) {
       console.error(error);
       alert('Error al actualizar la imagen de perfil.');
@@ -117,7 +114,7 @@ const ProfileTab = () => {
   const handleLogout = () => {
     setCurrentUser(null);
     setProfileImage(null);
-    router.replace({ pathname: '/' });
+    router.replace({ pathname: '/' }); // rutea al index
   };
 
   if (isLoading || pokemonDataLoading) {
@@ -212,14 +209,14 @@ const ProfileTab = () => {
 
         <TouchableOpacity
           style={styles.logoutButton}
-          onPress={handleLogout}
+          onPress={handleLogout} //logout
         >
           <Ionicons name="exit-outline" size={16} color="#fff" />
           <Text style={styles.logoutButtonText}>Abandonar Aventura</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Existing Modal remains the same */}
+        {/* modal */}
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.modalBackground}>
           <View style={styles.modalView}>
@@ -249,6 +246,7 @@ const ProfileTab = () => {
           </View>
         </View>
       </Modal>
+
     </LinearGradient>
   );
 };
