@@ -4,9 +4,13 @@ import { View, Text, Image, StyleSheet } from "react-native";
 const HomeCard = ({ nombre, imagen, descripcion }) => {
     return (
         <View style={styles.cardContainer}>
-            <Image source={imagen} style={styles.image} />
-            <Text style={styles.title}>{nombre}</Text>
-            <Text style={styles.description}>{descripcion}</Text>
+            <View style={styles.imageContainer}>
+                <Image source={imagen} style={styles.image} />
+            </View>
+            <View style={styles.textContainer}>
+                <Text style={styles.title}>{nombre}</Text>
+                <Text style={styles.description}>{descripcion}</Text>
+            </View>
         </View>
     );
 };
@@ -14,28 +18,45 @@ const HomeCard = ({ nombre, imagen, descripcion }) => {
 const styles = StyleSheet.create({
     cardContainer: {
         width: 300, 
-        borderRadius: 10,
-        backgroundColor: "#fff",
-        elevation: 3,
+        borderRadius: 15,
+        backgroundColor: "#F2F2F2",
+        elevation: 5,
         margin: 10,
-        padding: 15,
+        overflow: 'hidden',
+        shadowColor: "#FF1C1C",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        borderWidth: 2,
+        borderColor: "#FFCB05", // Pikachu Yellow
+    },
+    imageContainer: {
+        backgroundColor: "#4F7CAC", // Pokéball Blue
+        padding: 10,
         alignItems: "center",
     },
     image: {
         width: '100%',
         height: 150,
-        borderRadius: 10,
-        marginBottom: 10,
+        resizeMode: 'contain',
+    },
+    textContainer: {
+        padding: 15,
+        backgroundColor: "#FFFFFF",
     },
     title: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: "bold",
         marginBottom: 5,
+        color: "#3B4CCA", // Pokemon Blue
+        textTransform: 'capitalize',
+        textAlign: "center",
     },
     description: {
         fontSize: 14,
-        color: "#333",
+        color: "#616161",
         textAlign: "center",
+        fontStyle: "italic",
     },
 });
 

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { 
-    View, 
-    Text, 
-    ImageBackground, 
-    Image, 
-    StyleSheet, 
-    ScrollView, 
-    TouchableOpacity, 
-    ActivityIndicator 
+import {
+    View,
+    Text,
+    ImageBackground,
+    Image,
+    StyleSheet,
+    ScrollView,
+    TouchableOpacity,
+    ActivityIndicator
 } from "react-native";
 import HomeCard from "../componentes/HomeCard";
 
@@ -69,21 +69,21 @@ export default function HomeScreen() {
 
                 <View style={styles.carouselContainer}>
                     <TouchableOpacity onPress={handlePrev} style={styles.arrowContainer}>
-                        <Image 
-                            source={require("../../assets/flecha_izq.png")} 
-                            style={styles.arrow} 
+                        <Image
+                            source={require("../../assets/flecha_izq.png")}
+                            style={styles.arrow}
                         />
                     </TouchableOpacity>
 
-                    <Image 
-                        source={images[currentIndex]} 
-                        style={styles.carouselImage} 
+                    <Image
+                        source={images[currentIndex]}
+                        style={styles.carouselImage}
                     />
 
                     <TouchableOpacity onPress={handleNext} style={styles.arrowContainer}>
-                        <Image 
-                            source={require("../../assets/flecha_derecha.png")} 
-                            style={styles.arrow} 
+                        <Image
+                            source={require("../../assets/flecha_derecha.png")}
+                            style={styles.arrow}
                         />
                     </TouchableOpacity>
                 </View>
@@ -98,7 +98,7 @@ export default function HomeScreen() {
                         const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId}.png`;
 
                         return (
-                            <HomeCard 
+                            <HomeCard
                                 key={index}
                                 nombre={pokemon.name}
                                 imagen={{ uri: imageUrl }}
@@ -129,8 +129,8 @@ const styles = StyleSheet.create({
         color: "#000",
         textAlign: "center",
         marginBottom: 20,
-        fontWeight:"bold",
-    
+        fontWeight: "bold",
+
     },
     carouselContainer: {
         flexDirection: "row",
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
         fontSize: 24,
         marginBottom: 20,
         color: "#333",
-        fontWeight:800,
+        fontWeight: 800,
 
     },
     cardContainer: {

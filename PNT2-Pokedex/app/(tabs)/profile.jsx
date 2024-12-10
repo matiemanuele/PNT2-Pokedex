@@ -6,175 +6,225 @@ import usePokemonData from '../../components/usePokemonData';
 import { useUser } from '../context/AuthContext';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-
+import { LinearGradient } from 'expo-linear-gradient';
 
 const ProfileTab = () => {
-  const [modalVisible, setModalVisible] = useState(false)
-  const [displayPokemons, setDisplayPokemons] = useState([])
+  const [modalVisible, setModalVisible] = useState(false);
+  const [displayPokemons, setDisplayPokemons] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { profileImage, setProfileImage } = usePfp();
-  const { currentUser, setCurrentUser } = useUser()
+  const { profileImage, setProfileImage, removeProfileImageFromServer } = usePfp();
+  const { currentUser, setCurrentUser } = useUser();
   const { favoritePokemons } = useFavoritePokemons();
-  const { pokemons, loading } = usePokemonData()
+  const { pokemons, loading: pokemonDataLoading } = usePokemonData();
 
-  const router = useRouter()
+  const router = useRouter();
 
+  // Sincronización inicial del perfil
   useEffect(() => {
-    const syncProfileImage = async () => {
-      try {
-        if (currentUser?.profilePicture && currentUser.profilePicture !== profileImage) {
-          setProfileImage(currentUser.profilePicture);
-        }
-      } catch (error) {
-        console.error('Error al sincronizar la imagen de perfil:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    if (currentUser?.profilePicture) {
+      setProfileImage(currentUser.profilePicture);
+    }
+  }, [currentUser]);
 
-    syncProfileImage();
-  }, [currentUser, profileImage, setProfileImage]);
-
+  // Cargar datos del usuario al montar
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await fetch(`https://6711a7964eca2acdb5f554b7.mockapi.io/api/v1/users/${currentUser.id}`);
-        if (!response.ok) {
-          throw new Error('Error al cargar los datos del usuario');
-        }
-        const userData = await response.json();
-        setCurrentUser(userData);
-      } catch (error) {
-        console.error('Error al cargar el usuario:', error);
-        alert('No se pudieron cargar los datos del usuario.');
-      }
-    };
-
     if (currentUser?.id) {
-      fetchUserData();
+      fetchUserData(currentUser.id);
     }
   }, []);
 
-  const loadRandomPokemons = async () => {
-    if (pokemons.length === 0) return
-
-    try {
-      const randomPokemons = []
-      const tempPokemons = [...pokemons]
-
-      for (let i = 0; i < 9 && tempPokemons.length > 0; i++) {
-        const randomIndex = Math.floor(Math.random() * tempPokemons.length)
-        const pokemon = tempPokemons.splice(randomIndex, 1)[0]
-
-        const response = await fetch(pokemon.url)
-        const data = await response.json()
-
-        randomPokemons.push({
-          id: data.id,
-          name: pokemon.name,
-          sprite: data.sprites.front_default
-        })
-      }
-
-      setDisplayPokemons(randomPokemons)
-    } catch (error) {
-      console.error('Error loading sprites:', error)
-      alert('Error al cargar las opciones de imagen')
+  // Manejo del modal y pokémones aleatorios
+  useEffect(() => {
+    if (modalVisible && pokemons.length > 0) {
+      loadRandomPokemons();
     }
-  }
+  }, [modalVisible, pokemons.length]);
 
-  const selectProfilePicture = async (spriteUrl) => {
-    setIsLoading(true)
+  const fetchUserData = async (userId) => {
     try {
-      const updatedUser = {
-        ...currentUser,
-        profilePicture: spriteUrl,
-      }
+      const response = await fetch(`https://6711a7964eca2acdb5f554b7.mockapi.io/api/v1/users/${userId}`);
+      if (!response.ok) throw new Error('Error al cargar los datos del usuario');
+      const userData = await response.json();
+      setCurrentUser(userData);
+    } catch (error) {
+      console.error(error);
+      alert('No se pudieron cargar los datos del usuario.');
+    }
+  };
 
+  const loadRandomPokemons = async () => {
+    try {
+      const randomPokemons = pokemons
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 9)
+        .map(async (pokemon) => {
+          const response = await fetch(pokemon.url);
+          const data = await response.json();
+          return {
+            id: data.id,
+            name: pokemon.name,
+            sprite: data.sprites.front_default,
+          };
+        });
+
+      setDisplayPokemons(await Promise.all(randomPokemons));
+    } catch (error) {
+      console.error(error);
+      alert('Error al cargar las opciones de imagen.');
+    }
+  };
+
+  const updateProfilePicture = async (spriteUrl) => {
+    setIsLoading(true);
+    try {
+      const updatedUser = { ...currentUser, profilePicture: spriteUrl };
       const response = await fetch(
         `https://6711a7964eca2acdb5f554b7.mockapi.io/api/v1/users/${currentUser.id}`,
         {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(updatedUser)
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedUser),
         }
-      )
-      if (!response.ok) {
-        throw new Error('Error al actualizar la imagen de perfil')
-      }
-
-      const updatedUserData = await response.json()
-      setProfileImage(spriteUrl)
-      setCurrentUser(updatedUserData)
-      setModalVisible(false)
-
+      );
+      if (!response.ok) throw new Error('Error al actualizar la imagen de perfil');
+      // const updatedData = await response.json();
+      setProfileImage(spriteUrl);
+      setCurrentUser((prevUser) => ({
+        ...prevUser,
+        profilePicture: spriteUrl,
+      }));
+      setModalVisible(false);
     } catch (error) {
-      console.error('Error updating profile picture:', error);
-      alert('Error al actualizar la imagen de perfil');
+      console.error(error);
+      alert('Error al actualizar la imagen de perfil.');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
-
-  useEffect(() => {
-    if (modalVisible && pokemons.length > 0) {
-      loadRandomPokemons()
-    }
-  }, [modalVisible, pokemons])
-
-  const handleLogout = () => {
-    setCurrentUser(null)
-    setProfileImage(null)
-    router.replace({ pathname: '/' })
   };
 
-  if (isLoading) {
-    return <ActivityIndicator size="large" color="#0000ff" />;
+  const handleRemoveProfileImage = async () => {
+    setIsLoading(true);
+    try {
+      await removeProfileImageFromServer(currentUser.id);
+    } catch (error) {
+      alert('No se pudo eliminar la imagen de perfil. Inténtalo nuevamente.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setProfileImage(null);
+    router.replace({ pathname: '/' });
+  };
+
+  if (isLoading || pokemonDataLoading) {
+    return <ActivityIndicator size="large" color="#007bff" />;
   }
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.userName}>Hola, {currentUser?.name}</Text>
+  const getTypeGradient = (index) => {
+    const typeGradients = [
+      ['#3395D8', '#5BCAFF'],     // Water
+      ['#FF6C04', '#FF9900'],     // Fire
+      ['#3BA655', '#8BC34A'],     // Grass
+      ['#A040A0', '#C183C1'],     // Poison
+      ['#E0C068', '#F0E68C'],     // Ground
+      ['#B8B8D0', '#D1D1E0'],     // Steel
+      ['#7038F8', '#9180F0'],     // Dragon
+      ['#FF4081', '#FF80AB']      // Psychic
+    ];
+    return typeGradients[index % typeGradients.length];
+  };
 
-      <View style={styles.profileSection}>
-        {isLoading ? (
-          <ActivityIndicator size="large" color="#007bff" />
-        ) : currentUser?.profilePicture ? (
-          <Image
-            source={{ uri: profileImage }}
-            style={styles.profilePicture}
-          />
-        ) : (
-          <View style={styles.placeholderImage}>
-            <Ionicons name="person-circle-outline" size={60} color="#aaa" />
-            <Text>No hay imagen de perfil</Text>
+  return (
+    <LinearGradient
+      colors={['#3395D8', '#5BCAFF']}
+      style={styles.container}
+    >
+      <View style={styles.headerContainer}>
+        <Text style={styles.userName}>Hola, Entrenador {currentUser?.name}</Text>
+
+        <View style={styles.profileSection}>
+          <LinearGradient
+            colors={['#FF6C04', '#FF9900']}
+            style={styles.profileImageContainer}
+          >
+            {profileImage ? (
+              <Image
+                source={{ uri: profileImage }}
+                style={styles.profilePicture}
+              />
+            ) : (
+              <View style={styles.placeholderImage}>
+                <Ionicons name="person-circle-outline" size={80} color="#fff" />
+                <Text style={styles.placeholderText}>Elige tu Avatar</Text>
+              </View>
+            )}
+          </LinearGradient>
+
+          <View style={styles.profileActions}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => setModalVisible(true)}
+              disabled={pokemonDataLoading}
+            >
+              <Ionicons name="camera" size={16} color="#fff" />
+              <Text style={styles.actionButtonText}>Cambiar Avatar</Text>
+            </TouchableOpacity>
+
+            {profileImage && (
+              <TouchableOpacity
+                style={[styles.actionButton, styles.removeButton]}
+                onPress={handleRemoveProfileImage}
+              >
+                <Ionicons name="trash" size={16} color="#fff" />
+                <Text style={styles.actionButtonText}>Eliminar</Text>
+              </TouchableOpacity>
+            )}
           </View>
+        </View>
+
+        <Text style={styles.sectionTitle}>Tus Pokémones Favoritos</Text>
+        {favoritePokemons.length === 0 ? (
+          <Text style={styles.emptyMessage}>Aún no has atrapado Pokémon</Text>
+        ) : (
+          <FlatList
+            data={favoritePokemons}
+            keyExtractor={(item) => item.id.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item, index }) => (
+              <LinearGradient
+                colors={getTypeGradient(index)}
+                style={styles.favoritePokemonCard}
+              >
+                <Image
+                  source={{ uri: item.image }}
+                  style={styles.favoritePokemonImage}
+                />
+                <Text style={styles.favoritePokemonName}>{item.name}</Text>
+              </LinearGradient>
+            )}
+          />
         )}
+
         <TouchableOpacity
-          style={styles.button}
-          onPress={() => setModalVisible(true)}
-          disabled={loading}
+          style={styles.logoutButton}
+          onPress={handleLogout}
         >
-          <Ionicons name="camera" size={16} color="#fff" />
-          <Text style={styles.buttonText}>Cambiar imagen</Text>
+          <Ionicons name="exit-outline" size={16} color="#fff" />
+          <Text style={styles.logoutButtonText}>Abandonar Aventura</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Modal de selección de Pokémon */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
+      {/* Existing Modal remains the same */}
+      <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.modalBackground}>
           <View style={styles.modalView}>
-            <Text style={styles.modalTitle}>Elige tu Pokémon</Text>
-
-            {loading ? (
+            <Text style={styles.modalTitle}>Elige tu Compañero</Text>
+            {pokemonDataLoading ? (
               <ActivityIndicator size="large" color="#007bff" />
             ) : (
               <FlatList
@@ -184,135 +234,160 @@ const ProfileTab = () => {
                 renderItem={({ item }) => (
                   <TouchableOpacity
                     style={styles.spriteOption}
-                    onPress={() => selectProfilePicture(item.sprite)}
+                    onPress={() => updateProfilePicture(item.sprite)}
                   >
-                    <Image
-                      source={{ uri: item.sprite }}
-                      style={styles.spriteImage}
-                    />
+                    <Image source={{ uri: item.sprite }} style={styles.spriteImage} />
                     <Text style={styles.spriteName}>{item.name}</Text>
                   </TouchableOpacity>
                 )}
-                contentContainerStyle={styles.flatListContainer}
-                showsVerticalScrollIndicator={false}
               />
             )}
-
             <View style={styles.modalButtons}>
-              <Button
-                title="Más opciones"
-                onPress={loadRandomPokemons}
-                disabled={loading}
-                color="#007bff"
-              />
-              <Button
-                title="Cancelar"
-                onPress={() => setModalVisible(false)}
-                color="red"
-              />
+              <Button title="Más Opciones" onPress={loadRandomPokemons} disabled={pokemonDataLoading} />
+              <Button title="Cancelar" onPress={() => setModalVisible(false)} color="red" />
             </View>
           </View>
         </View>
       </Modal>
-
-      <Text style={styles.title}>Tus Pokémones Favoritos</Text>
-      {favoritePokemons.length === 0 ? (
-        <Text style={styles.emptyMessage}>No tienes Pokémon favoritos aún</Text>
-      ) : (
-        <FlatList
-          data={favoritePokemons}
-          keyExtractor={(item) => item.id.toString()}
-          numColumns={3}
-          renderItem={({ item }) => (
-            <View style={styles.pokemonCard}>
-              <Text style={styles.pokemonName}>{item.name}</Text>
-              <Image
-                source={{ uri: item.image }}
-                style={styles.pokemonImage}
-                resizeMode="contain"
-              />
-            </View>
-          )}
-        />
-      )}
-      <TouchableOpacity style={[styles.button, { backgroundColor: "red", marginTop: 20 }]} onPress={handleLogout}>
-        <Ionicons name="exit-outline" size={16} color="#fff" />
-        <Text style={styles.buttonText}>Cerrar Sesión</Text>
-      </TouchableOpacity>
-    </View>
+    </LinearGradient>
   );
 };
-
-
-
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
+  },
+  headerContainer: {
+    flex: 1,
     padding: 24,
-    backgroundColor: '#f7f7f7',
+    alignItems: 'center',
+  },
+  userName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginTop: 40,
+    marginBottom: 20,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   profileSection: {
     alignItems: 'center',
-    marginVertical: 20,
-  },
-  userName: {
-    fontSize: 26,
-    fontWeight: 'bold',
     marginBottom: 20,
-    color: '#333',
   },
-  profilePicture: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginBottom: 10,
-    borderWidth: 3,
-    borderColor: '#007bff',
-  },
-  placeholderImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#ddd',
+  profileImageContainer: {
+    width: 160,
+    height: 160,
+    borderRadius: 80,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-  title: {
-    fontSize: 22,
+  profilePicture: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+  },
+  placeholderImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeholderText: {
+    color: '#FFFFFF',
     fontWeight: 'bold',
-    marginVertical: 15,
-    color: '#333',
+    marginTop: 10,
+  },
+  profileActions: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FF4081',
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 20,
+    marginHorizontal: 10,
+  },
+  removeButton: {
+    backgroundColor: '#BEBEBE',
+  },
+  actionButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    marginLeft: 5,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 15,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   emptyMessage: {
-    marginTop: 20,
-    color: '#666',
+    color: '#FFFFFF',
+    fontSize: 16,
+    marginBottom: 20,
   },
-  pokemonCard: {
+  favoritePokemonCard: {
+    width: 110,
+    height: 140,
+    borderRadius: 15,
+    marginHorizontal: 5,
+    justifyContent: 'center',
     alignItems: 'center',
-    justifyContent: 'space-between',
     padding: 10,
-    margin: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
-    backgroundColor: '#fff',
-    width: 100,
-    height: 120,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-  pokemonImage: {
-    width: 60,
-    height: 60,
+  favoritePokemonImage: {
+    width: 80,
+    height: 80,
   },
-  pokemonName: {
-    fontSize: 12,
-    textAlign: 'center',
-    color: '#333',
+  favoritePokemonName: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
     marginTop: 5,
-    maxWidth: '90%',
+    textAlign: 'center',
   },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'red',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 25,
+    marginTop: 20,
+  },
+  logoutButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  // Existing modal styles remain largely the same
   modalBackground: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -326,69 +401,26 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    textAlign: 'center',
-    color: '#333',
-  },
-  flatListContainer: {
-    alignItems: 'center',
-    paddingBottom: 20,
   },
   spriteOption: {
-    width: '30%',
-    aspectRatio: 1,
+    width: 100,
+    height: 120,
     margin: 5,
     borderRadius: 10,
     backgroundColor: '#f0f0f0',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
   },
   spriteImage: {
-    width: '70%',
-    height: '70%',
-    resizeMode: 'contain',
+    width: 80,
+    height: 80,
   },
   spriteName: {
     marginTop: 8,
     fontSize: 12,
     fontWeight: '600',
     textAlign: 'center',
-    color: '#444',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-    width: '100%',
-  },
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#007bff',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-    marginVertical: 10,
-  },
-  buttonText: {
-    marginLeft: 8,
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 14,
   },
 });
-
 
 export default ProfileTab;

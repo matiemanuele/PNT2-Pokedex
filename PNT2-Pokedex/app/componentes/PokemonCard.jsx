@@ -38,10 +38,8 @@ const PokemonDetail = () => {
     try {
       if (action === "add") {
         await addFavoritePokemon(pokemon);
-        Alert.alert("Éxito", "Pokémon agregado a favoritos")
       } else {
         await removeFavoritePokemon(pokemon.id)
-        Alert.alert("Éxito", "Pokémon eliminado de favoritos")
       }
     } catch (error) {
       Alert.alert("Error", "No se pudo actualizar la lista de favoritos");
@@ -61,69 +59,63 @@ const PokemonDetail = () => {
       style={styles.container}
       contentContainerStyle={{ paddingBottom: 50 }}
     >
-      <Text style={styles.title}>{pokemon.forms && pokemon.forms[0]?.name}</Text>
-      {pokemon.sprites && pokemon.sprites.front_default ? (
-        <Image
-          style={styles.image}
-          resizeMode="contain"
-          source={{ uri: pokemon.sprites.front_default }}
-        />
-      ) : (
-        <Text>No se encontró imagen del pokemon</Text>
-      )}
-
-
-      <View style={styles.card}>
-        <Text style={styles.subTitle}>Habilidades:</Text>
-        {pokemon.abilities.map((ability) => (
-          <Text style={styles.descripcion} key={ability.ability.name}>
-            {ability.ability.name}
-          </Text>
-        ))}
+      <View style={styles.headerContainer}>
+        <Text style={styles.title}>{pokemon.forms && pokemon.forms[0]?.name}</Text>
+        {pokemon.sprites && pokemon.sprites.front_default ? (
+          <View style={styles.imageWrapper}>
+            <Image
+              style={styles.image}
+              resizeMode="contain"
+              source={{ uri: pokemon.sprites.front_default }}
+            />
+          </View>
+        ) : (
+          <Text>No se encontró imagen del pokemon</Text>
+        )}
       </View>
 
+      <View style={styles.detailsContainer}>
+        <View style={styles.card}>
+          <Text style={styles.subTitle}>🔥 Habilidades:</Text>
+          {pokemon.abilities.map((ability) => (
+            <Text style={styles.descripcion} key={ability.ability.name}>
+              {ability.ability.name}
+            </Text>
+          ))}
+        </View>
 
+        <View style={styles.card}>
+          <Text style={styles.subTitle}>🌈 Tipos:</Text>
+          {pokemon.types.map((type) => (
+            <Text style={styles.descripcion} key={type.type.name}>
+              {type.type.name}
+            </Text>
+          ))}
+        </View>
 
+        <View style={styles.card}>
+          <Text style={styles.subTitle}>⚡ Movimientos:</Text>
+          {pokemon.moves.slice(0, 5).map((move) => (
+            <Text style={styles.descripcion} key={move.move.name}>
+              {move.move.name}
+            </Text>
+          ))}
+        </View>
 
-      <View style={styles.card}>
+        <View style={styles.card}>
+          <Text style={styles.subTitle}>📊 Estadísticas:</Text>
+          {pokemon.stats.map((stat) => (
+            <Text style={styles.descripcion} key={stat.stat.name}>
+              {stat.stat.name}: {stat.base_stat}
+            </Text>
+          ))}
+        </View>
 
-        <Text style={styles.subTitle}>Tipos:</Text>
-        {pokemon.types.map((type) => (
-          <Text style={styles.descripcion} key={type.type.name}>
-            {type.type.name}
-          </Text>
-        ))}
-      </View>
-
-
-
-      <View style={styles.card}>
-        <Text style={styles.subTitle}>Movimientos:</Text>
-        {pokemon.moves.slice(0, 5).map((move) => (
-          <Text style={styles.descripcion} key={move.move.name}>
-            {move.move.name}
-          </Text>
-        ))}
-      </View>
-
-
-
-      <View style={styles.card}>
-
-        <Text style={styles.subTitle}>Estadísticas:</Text>
-        {pokemon.stats.map((stat) => (
-          <Text style={styles.descripcion} key={stat.stat.name}>
-            {stat.stat.name}: {stat.base_stat}
-          </Text>
-        ))}
-      </View>
-
-
-      <View style={styles.card}>
-        <Text style={styles.subTitle}>Altura: </Text>
-        <Text style={styles.descripcion}>{pokemon.height / 10} metros</Text>
-        <Text style={styles.subTitle}>Peso: </Text>
-        <Text style={styles.descripcion}>{pokemon.weight / 10} kilogramos</Text>
+        <View style={styles.card}>
+          <Text style={styles.subTitle}>📏 Detalles Físicos:</Text>
+          <Text style={styles.descripcion}>Altura: {pokemon.height / 10} metros</Text>
+          <Text style={styles.descripcion}>Peso: {pokemon.weight / 10} kilogramos</Text>
+        </View>
       </View>
 
       <View style={styles.buttonContainer}>
@@ -153,77 +145,84 @@ const PokemonDetail = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f3f4f6",
+    backgroundColor: "#F0F4F8", // Light background
+  },
+  headerContainer: {
+    backgroundColor: "#FFCB05", // Pikachu Yellow
+    paddingVertical: 20,
+    alignItems: "center",
   },
   title: {
-    fontSize: 30,
+    fontSize: 32,
     fontWeight: "bold",
-    color: "#1a237e",
+    color: "#3B4CCA", // Pokemon Blue
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 15,
     textTransform: "capitalize",
+  },
+  imageWrapper: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  image: {
+    width: 250,
+    height: 250,
+  },
+  detailsContainer: {
+    padding: 15,
+  },
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 15,
+    shadowColor: "#3B4CCA",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   subTitle: {
     fontSize: 22,
     fontWeight: "bold",
-    color: "#424242",
-    marginTop: 20,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderColor: "#bdbdbd",
+    color: "#3B4CCA",
+    marginBottom: 10,
+    borderBottomWidth: 2,
+    borderBottomColor: "#FFCB05",
+    paddingBottom: 5,
   },
-  card: {
-    backgroundColor: "#e8eaf6",
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 20,
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-  },
-  image: {
-    width: "100%",
-    height: 300,
-    marginBottom: 20,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 10,
+  descripcion: {
+    fontSize: 16,
+    color: "#333",
+    marginVertical: 5,
+    paddingHorizontal: 10,
   },
   buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   button: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#ffcc01", // Amarillo temático
-    padding: 12,
-    borderRadius: 8,
-    marginHorizontal: 10,
+    backgroundColor: "#3B4CCA", // Pokemon Blue
+    padding: 15,
+    borderRadius: 10,
   },
   buttonRemove: {
-    backgroundColor: "#e53935", // Rojo para quitar
+    backgroundColor: "#FF1C1C", // Vibrant Red
   },
   buttonText: {
-    color: "#fff",
-    fontSize: 16,
+    color: "#FFFFFF",
+    fontSize: 18,
     fontWeight: "bold",
-    marginLeft: 8, // Espacio entre el ícono y el texto
-  },
-  descripcion: {
-    fontSize: 16,
-    color: "#616161",
-    marginTop: 5,
-    marginBottom: 10,
-    paddingHorizontal: 10,
+    marginLeft: 10,
   },
 });
 

@@ -1,93 +1,76 @@
-import { StyleSheet, Text, View, TextInput, Switch, Button, Image } from "react-native";
+import { StyleSheet, Text, View, TextInput, Button, Image, useColorScheme, TouchableOpacity } from "react-native";
 import { useState } from "react";
 import { useRouter } from "expo-router";
 import { useUser } from "./context/AuthContext";
-import { usePfp } from "./context/PfpContext";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function Page() {
-
   const [esLogin, setLogin] = useState(true);
-  const [email, setEmail] = useState("");
-  const [usuario, setUsuario] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({ email: "", usuario: "", password: "", nombre: "" });
   const [showPassword, setShowPassword] = useState(false);
-  const [nombre, setNombre] = useState("");
 
   const router = useRouter();
+  const { login, register } = useUser();
+  const colorScheme = useColorScheme(); // Obtiene el esquema de color del dispositivo
 
-  const { login, register } = useUser()
-  const { randomProfileImage } = usePfp()
+  const handleInputChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
-  const handleLogin = async () => {
-    const result = await login(usuario, password)
-    if (result === true) {
-      alert("Login conseguido")
-      router.push("/homeScreen")
-    } else if (result === false) {
-      alert("Login fallido")
+  const handleAction = async () => {
+    const { email, usuario, password, nombre } = formData;
+
+    if (esLogin) {
+      const result = await login(usuario, password);
+      result ? router.push("/homeScreen") : alert("Login fallido");
     } else {
-      alert("Error en la autenticación")
+      const result = await register(usuario, email, password, nombre);
+      alert(result ? "Registro exitoso" : "Error al registrar");
     }
-  }
-
-  const handleRegister = async () => {
-    const profileImage = await randomProfileImage()
-    const result = await register(usuario, email, password, nombre, profileImage)
-    if (result === true) {
-      alert("Registro exitoso")
-    } else if (result === false) {
-      alert("Usuario o email ya registrado")
-    } else {
-      alert("Error en la autenticación")
-    }
-  }
+  };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, colorScheme === 'dark' && styles.containerDark]}>
       <Image
-        source={{ uri: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png" }}
+        source={{ uri: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/25.png" }}
         style={styles.logo}
       />
-      <Text style={styles.title}>¡Bienvenido a la Pokedex!</Text>
-      <Text style={styles.subtitle}>
+      <Text style={[styles.title, colorScheme === 'dark' && styles.titleDark]}>¡Bienvenido a la Pokedex!</Text>
+      <Text style={[styles.subtitle, colorScheme === 'dark' && styles.subtitleDark]}>
         {esLogin ? "Inicia sesión para continuar" : "Crea tu cuenta para empezar"}
       </Text>
 
       <View style={styles.main}>
-        <Text style={styles.label}>Usuario:</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, colorScheme === 'dark' && styles.inputDark]}
           placeholder="Nombre de usuario"
-          value={usuario}
-          onChangeText={setUsuario}
+          value={formData.usuario}
+          onChangeText={(text) => handleInputChange("usuario", text)}
         />
         {!esLogin && (
           <>
-            <Text style={styles.label}>Email:</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, colorScheme === 'dark' && styles.inputDark]}
               placeholder="email@gmail.com"
-              value={email}
-              onChangeText={setEmail}
+              value={formData.email}
+              onChangeText={(text) => handleInputChange("email", text)}
             />
-            <Text style={styles.label}>Nombre:</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, colorScheme === 'dark' && styles.inputDark]}
               placeholder="Tu nombre"
-              value={nombre}
-              onChangeText={setNombre}
+              value={formData.nombre}
+              onChangeText={(text) => handleInputChange("nombre", text)}
             />
           </>
         )}
-        <Text style={styles.label}>Contraseña:</Text>
-        <View style={styles.passwordContainer}>
+        <View style={[styles.passwordContainer, colorScheme === 'dark' && styles.passwordContainerDark]}>
           <TextInput
-            style={styles.passwordInput}
+            style={[styles.passwordInput, colorScheme === 'dark' && styles.passwordInputDark]}
             secureTextEntry={!showPassword}
             placeholder="Contraseña"
-            value={password}
-            onChangeText={setPassword}
+            value={formData.password}
+            onChangeText={(text) => handleInputChange("password", text)}
+            onSubmitEditing={handleAction} // Llama a la acción al presionar Enter
           />
           <Ionicons
             name={showPassword ? "eye-off" : "eye"}
@@ -98,28 +81,27 @@ export default function Page() {
         </View>
       </View>
 
-      <View style={styles.buttonContainer}>
-        <Button
-          title={esLogin ? "Iniciar sesión" : "Registrarse"}
-          onPress={esLogin ? handleLogin : handleRegister}
-          color={esLogin ? "#007bff" : "#28a745"}
-        />
-      </View>
+      <Button
+        title={esLogin ? "Iniciar sesión" : "Registrarse"}
+        onPress={handleAction}
+        color={esLogin ? "#007bff" : "#28a745"}
+      />
 
       <View style={styles.switchContainer}>
-        <Text style={styles.switchText}>
-          {esLogin ? "¿No tienes cuenta? Regístrate" : "¿Ya tienes cuenta? Inicia sesión"}
+        <Text style={[styles.switchText, colorScheme === 'dark' && styles.switchTextDark]}>
+          {esLogin ? (
+            <TouchableOpacity onPress={() => setLogin(false)}>
+              <Text style={styles.link}>¿No tienes cuenta? Regístrate</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity onPress={() => setLogin(true)}>
+              <Text style={styles.link}>¿Ya tienes cuenta? Inicia sesión</Text>
+            </TouchableOpacity>
+          )}
         </Text>
-        <Switch
-          value={esLogin}
-          onValueChange={() => setLogin(!esLogin)}
-          thumbColor={esLogin ? "#007bff" : "#28a745"}
-          trackColor={{ false: "#d6d6d6", true: "#a3d9a5" }}
-        />
       </View>
     </View>
   );
-
 }
 
 const styles = StyleSheet.create({
@@ -129,6 +111,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#f1f1f1",
     padding: 20,
+  },
+  containerDark: {
+    backgroundColor: "#2e2e2e",
   },
   logo: {
     width: 100,
@@ -142,20 +127,21 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 10,
   },
+  titleDark: {
+    color: "#fff",
+  },
   subtitle: {
     fontSize: 16,
     color: "#666",
     textAlign: "center",
     marginBottom: 20,
   },
+  subtitleDark: {
+    color: "#bbb",
+  },
   main: {
     width: "100%",
     paddingHorizontal: 20,
-  },
-  label: {
-    fontSize: 14,
-    color: "#333",
-    marginBottom: 5,
   },
   input: {
     width: "100%",
@@ -167,9 +153,33 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 15,
   },
-  buttonContainer: {
-    marginVertical: 20,
-    width: "100%",
+  inputDark: {
+    backgroundColor: "#444",
+    borderColor: "#666",
+    color: "#fff",
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    backgroundColor: "#fff",
+    marginBottom: 20,
+    width: "100%"
+  },
+  passwordContainerDark: {
+    backgroundColor: "#444"
+  },
+  passwordInput: {
+    flex: 1,
+    padding: 10,
+    fontSize: 16,
+  },
+  passwordInputDark: {
+    backgroundColor: "#444",
+    color: "#fff",
   },
   switchContainer: {
     flexDirection: "row",
@@ -182,19 +192,11 @@ const styles = StyleSheet.create({
     color: "#555",
     marginRight: 10,
   },
-  passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "gray",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    backgroundColor: "#fff",
-    marginBottom: 20,
+  switchTextDark: {
+    color: "#ddd",
   },
-  passwordInput: {
-    flex: 1,
-    padding: 10,
-    fontSize: 16,
+  link: {
+    color: "#007bff",
+    textDecorationLine: "underline",
   },
 });

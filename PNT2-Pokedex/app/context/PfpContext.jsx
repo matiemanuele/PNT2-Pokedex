@@ -1,73 +1,86 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useContext, useEffect, useState } from "react";
 
-const PfpContext = createContext()
+const PfpContext = createContext();
 
 export function usePfp() {
-    return useContext(PfpContext)
+  return useContext(PfpContext);
 }
 
 const PfpProvider = ({ children }) => {
+  const [profileImage, setProfileImage] = useState(null);
+  const defaultImage = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/dream-world/poke-ball.png"; // Imagen predeterminada (Pikachu)
 
-    const [profileImage, setProfileImage] = useState(null); // Usa `null` como inicial
-    const [isLoaded, setIsLoaded] = useState(false); // Nuevo estado para verificar la carga inicial
-
-    // Cargar la imagen guardada al inicio
-    useEffect(() => {
-        const loadProfileImage = async () => {
-            try {
-                const savedImage = await AsyncStorage.getItem('profileImage');
-                if (savedImage) {
-                    setProfileImage(savedImage);
-                }
-            } catch (error) {
-                console.error('Error al cargar la imagen de perfil:', error);
-            } finally {
-                setIsLoaded(true); // Marca como cargado
-            }
-        };
-
-        loadProfileImage();
-    }, []);
-
-    const updateProfileImage = async (newProfileImage) => {
-        try {
-            if (newProfileImage) {
-                await AsyncStorage.setItem('profileImage', newProfileImage);
-                setProfileImage(newProfileImage);
-            } else {
-                await AsyncStorage.removeItem('profileImage');
-                setProfileImage(null);
-            }
-        } catch (error) {
-            console.error('Error al guardar la imagen de perfil:', error);
-        }
+  // Cargar la imagen guardada al iniciar
+  useEffect(() => {
+    const loadProfileImage = async () => {
+      try {
+        const savedImage = await AsyncStorage.getItem("profileImage");
+        setProfileImage(savedImage || defaultImage);
+      } catch (error) {
+        console.error("Error al cargar la imagen de perfil:", error);
+      }
     };
 
-    // Generar una imagen aleatoria si no hay una establecida
-    const randomProfileImage = async () => {
-        if (!profileImage) {
-            const randomId = Math.floor(Math.random() * 898) + 1;
-            const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${randomId}`);
-            const data = await response.json();
-            const newProfileImage = data.sprites.front_default;
+    loadProfileImage();
+  }, []);
 
-            await updateProfileImage(newProfileImage);
-
-            return newProfileImage;
-        }
-    };
-
-    // No renderizar hasta que esté cargado
-    if (!isLoaded) {
-        return null; // O un spinner/cargando si prefieres
+  const updateProfileImage = async (newImage) => {
+    try {
+      if (newImage) {
+        await AsyncStorage.setItem("profileImage", newImage);
+      } else {
+        await AsyncStorage.removeItem("profileImage");
+      }
+      setProfileImage(newImage || defaultImage); // Actualiza el estado local
+    } catch (error) {
+      console.error("Error al actualizar la imagen de perfil:", error);
     }
+  };
 
-    return (
-        <PfpContext.Provider value={{ profileImage, setProfileImage: updateProfileImage, randomProfileImage }}>
-            {children}
-        </PfpContext.Provider>
-    )
-}
+  const removeProfileImage = async () => {
+    try {
+      await AsyncStorage.removeItem("profileImage"); // Elimina de AsyncStorage
+      setProfileImage(defaultImage); // Restablece la imagen predeterminada
+    } catch (error) {
+      console.error("Error al eliminar la imagen de perfil:", error);
+    }
+  };
 
-export default PfpProvider
+  const removeProfileImageFromServer = async (userId) => {
+    try {
+      const updatedUser = { profilePicture: null }; // Solo actualizamos la imagen
+      const response = await fetch(
+        `https://6711a7964eca2acdb5f554b7.mockapi.io/api/v1/users/${userId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedUser),
+        }
+      );
+
+      if (!response.ok) throw new Error("Error al eliminar la imagen en el servidor");
+
+      await AsyncStorage.removeItem("profileImage"); // También eliminamos del almacenamiento local
+      setProfileImage(defaultImage); // Restablece la imagen predeterminada
+    } catch (error) {
+      console.error("Error al eliminar la imagen en el servidor:", error);
+      throw error; // Lanza el error para manejarlo en la interfaz
+    }
+  };
+
+  return (
+    <PfpContext.Provider
+      value={{
+        profileImage,
+        setProfileImage: updateProfileImage,
+        removeProfileImageFromServer,
+        removeProfileImage,
+      }}
+    >
+      {children}
+    </PfpContext.Provider>
+  );
+};
+
+export default PfpProvider;
